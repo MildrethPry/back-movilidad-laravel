@@ -12,7 +12,7 @@ class DriverListController extends Controller
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        if (!$user || !$user->role || $user->role->name !== 'jefe_transporte') {
+        if (! $user || ! $user->hasRole(['secretaria', 'jefe_transporte'])) {
             return response()->json(['message' => 'Acceso denegado.'], 403);
         }
 
@@ -51,7 +51,9 @@ class DriverListController extends Controller
 
             return [
                 'id' => $driver->id,
+                'user_id' => $driver->user_id,
                 'name' => $driver->user ? ($driver->user->first_name . ' ' . $driver->user->last_name) : 'Chofer sin nombre',
+                'email' => $driver->user?->email,
                 'national_id' => $driver->user ? $driver->user->national_id : '',
                 'contract_type' => $driver->contract_type,
                 'is_available' => $driver->is_available,
@@ -60,7 +62,7 @@ class DriverListController extends Controller
                 'expiration_date' => $activeLicense ? $activeLicense->expiration_date : ($driver->licenses()->first() ? $driver->licenses()->first()->expiration_date : 'N/A'),
                 'status_label' => $statusLabel,
                 'status_details' => $statusDetails,
-                'is_selectable' => $isSelectable
+                'is_selectable' => $isSelectable,
             ];
         });
 

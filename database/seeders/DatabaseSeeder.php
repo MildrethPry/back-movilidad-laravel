@@ -31,30 +31,19 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $roles = [
-            [
-                'name' => 'solicitante',
-                'description' => 'Docente / Tutor que solicita movilizaciones.'
-            ],
-            [
-                'name' => 'rector',
-                'description' => 'Autoridad máxima que autoriza viajes externos.'
-            ],
-            [
-                'name' => 'jefe_transporte',
-                'description' => 'Administrador que asigna vehículos, choferes y recursos.'
-            ],
-            [
-                'name' => 'chofer',
-                'description' => 'Conductor de vehículos de la institución.'
-            ],
-            [
-                'name' => 'mecanico',
-                'description' => 'Encargado del taller y actas de entrega/recepción.'
-            ],
-            [
-                'name' => 'pasajero',
-                'description' => 'Estudiante, servidor público o docente que viaja.'
-            ]
+            ['name' => 'secretaria', 'description' => 'Secretaría / Administrativo — eje central operativo.'],
+            ['name' => 'conductor', 'description' => 'Conductor de vehículos institucionales.'],
+            ['name' => 'mecanico', 'description' => 'Encargado de mantenimiento y patio.'],
+            ['name' => 'docente', 'description' => 'Docente / tutor que solicita movilizaciones.'],
+            ['name' => 'responsable_facultad', 'description' => 'Autoridad de facultad que supervisa solicitudes de su unidad.'],
+            ['name' => 'vicerrector', 'description' => 'Aprueba viajes externos tras autorización de secretaría.'],
+            ['name' => 'estudiante', 'description' => 'Estudiante participante en viajes académicos.'],
+            // Aliases legacy (compatibilidad)
+            ['name' => 'solicitante', 'description' => 'Alias legacy de docente.'],
+            ['name' => 'rector', 'description' => 'Alias legacy de vicerrector.'],
+            ['name' => 'jefe_transporte', 'description' => 'Alias legacy de secretaria.'],
+            ['name' => 'chofer', 'description' => 'Alias legacy de conductor.'],
+            ['name' => 'pasajero', 'description' => 'Alias legacy de estudiante.'],
         ];
 
         foreach ($roles as $role) {
@@ -64,63 +53,87 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        // Crear usuario de prueba: Solicitante
-        $solicitanteRole = Role::where('name', 'solicitante')->first();
-        User::firstOrCreate(
-            ['email' => 'solicitante@test.com'],
+        $attach = static function (User $user, array $roleNames): void {
+            $user->syncRoleNames($roleNames, $roleNames[0] ?? null);
+        };
+
+        $docenteRole = Role::where('name', 'docente')->first();
+        $docente = User::firstOrCreate(
+            ['email' => 'docente@uleam.edu.ec'],
             [
-                'national_id' => '1312345678',
+                'national_id' => '1399000001',
                 'first_name' => 'Juan Carlos',
-                'last_name' => 'Pérez (Solicitante)',
+                'last_name' => 'Pérez (Docente)',
                 'password' => Hash::make('password'),
                 'faculty_institution' => 'FACULTAD DE CIENCIAS INFORMATICAS',
-                'role_id' => $solicitanteRole ? $solicitanteRole->id : null,
+                'role_id' => $docenteRole?->id,
             ]
         );
+        $attach($docente, ['docente']);
 
-        // Crear usuario de prueba: Jefe de Transporte
-        $jefeRole = Role::where('name', 'jefe_transporte')->first();
-        User::firstOrCreate(
-            ['email' => 'jefe@test.com'],
+        $legacyDocente = User::where('email', 'solicitante@test.com')->first();
+        if ($legacyDocente) {
+            $attach($legacyDocente, ['docente']);
+        }
+
+        $secretariaRole = Role::where('name', 'secretaria')->first();
+        $secretaria = User::firstOrCreate(
+            ['email' => 'secretaria@uleam.edu.ec'],
             [
-                'national_id' => '1309876543',
+                'national_id' => '1399000002',
                 'first_name' => 'Ricardo Andrés',
-                'last_name' => 'Loor (Jefe de Transporte)',
+                'last_name' => 'Loor (Secretaría)',
                 'password' => Hash::make('password'),
                 'faculty_institution' => 'DIRECCIÓN DE TRANSPORTE Y MOVILIDAD',
-                'role_id' => $jefeRole ? $jefeRole->id : null,
+                'role_id' => $secretariaRole?->id,
             ]
         );
+        $attach($secretaria, ['secretaria']);
 
-        // Crear usuario de prueba: Rector
-        $rectorRole = Role::where('name', 'rector')->first();
-        User::firstOrCreate(
-            ['email' => 'rector@test.com'],
+        $legacySec = User::where('email', 'jefe@test.com')->first();
+        if ($legacySec) {
+            $attach($legacySec, ['secretaria']);
+        }
+
+        $vicerrectorRole = Role::where('name', 'vicerrector')->first();
+        $vicerrector = User::firstOrCreate(
+            ['email' => 'vicerrector@uleam.edu.ec'],
             [
-                'national_id' => '1301122334',
+                'national_id' => '1399000003',
                 'first_name' => 'Martha Sofía',
-                'last_name' => 'Mendoza (Rectora)',
+                'last_name' => 'Mendoza (Vicerrectora)',
                 'password' => Hash::make('password'),
-                'faculty_institution' => 'RECTORADO',
-                'role_id' => $rectorRole ? $rectorRole->id : null,
+                'faculty_institution' => 'VICERRECTORADO',
+                'role_id' => $vicerrectorRole?->id,
             ]
         );
+        $attach($vicerrector, ['vicerrector']);
 
-        // Crear choferes de prueba
-        $choferRole = Role::where('name', 'chofer')->first();
+        $legacyVic = User::where('email', 'rector@test.com')->first();
+        if ($legacyVic) {
+            $attach($legacyVic, ['vicerrector']);
+        }
 
-        // Chofer 1: Luis (Habilitado y Disponible)
+        $conductorRole = Role::where('name', 'conductor')->first();
+        $mecanicoRole = Role::where('name', 'mecanico')->first();
+
         $userDriver1 = User::firstOrCreate(
-            ['email' => 'chofer1@test.com'],
+            ['email' => 'conductor1@uleam.edu.ec'],
             [
-                'national_id' => '1311111111',
+                'national_id' => '1399000004',
                 'first_name' => 'Luis Alberto',
-                'last_name' => 'Moreira (Chofer 1)',
+                'last_name' => 'Moreira (Conductor)',
                 'password' => Hash::make('password'),
                 'faculty_institution' => 'DIRECCIÓN DE TRANSPORTE Y MOVILIDAD',
-                'role_id' => $choferRole ? $choferRole->id : null,
+                'role_id' => $conductorRole?->id,
             ]
         );
+        $attach($userDriver1, ['conductor']);
+
+        $legacyDriver = User::where('email', 'chofer1@test.com')->first();
+        if ($legacyDriver) {
+            $attach($legacyDriver, ['conductor']);
+        }
         $driver1 = Driver::firstOrCreate(
             ['user_id' => $userDriver1->id],
             [
@@ -137,18 +150,59 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // Chofer 2: Carlos (Inhabilitado - Licencia Expirada)
         $userDriver2 = User::firstOrCreate(
             ['email' => 'chofer2@test.com'],
             [
                 'national_id' => '1322222222',
                 'first_name' => 'Carlos Andrés',
-                'last_name' => 'Vera (Chofer Inhabilitado)',
+                'last_name' => 'Vera (Conductor Inhabilitado)',
                 'password' => Hash::make('password'),
                 'faculty_institution' => 'DIRECCIÓN DE TRANSPORTE Y MOVILIDAD',
-                'role_id' => $choferRole ? $choferRole->id : null,
+                'role_id' => $conductorRole?->id,
             ]
         );
+        $attach($userDriver2, ['conductor']);
+
+        // Conductor + Mecánico (doble rol permitido)
+        $userDual = User::firstOrCreate(
+            ['email' => 'conductor.mecanico@uleam.edu.ec'],
+            [
+                'national_id' => '1333333333',
+                'first_name' => 'Pedro',
+                'last_name' => 'Zambrano (Conductor+Mecánico)',
+                'password' => Hash::make('password'),
+                'faculty_institution' => 'DIRECCIÓN DE TRANSPORTE Y MOVILIDAD',
+                'role_id' => $conductorRole?->id,
+            ]
+        );
+        $attach($userDual, ['conductor', 'mecanico']);
+
+        $mecanico = User::firstOrCreate(
+            ['email' => 'mecanico@uleam.edu.ec'],
+            [
+                'national_id' => '1344444444',
+                'first_name' => 'Andrés',
+                'last_name' => 'Cedeño (Mecánico)',
+                'password' => Hash::make('password'),
+                'faculty_institution' => 'DIRECCIÓN DE TRANSPORTE Y MOVILIDAD',
+                'role_id' => $mecanicoRole?->id,
+            ]
+        );
+        $attach($mecanico, ['mecanico']);
+
+        $respFacultadRole = Role::where('name', 'responsable_facultad')->first();
+        $docenteDecano = User::firstOrCreate(
+            ['email' => 'decano@uleam.edu.ec'],
+            [
+                'national_id' => '1355555555',
+                'first_name' => 'Ana',
+                'last_name' => 'Vera (Docente + Facultad)',
+                'password' => Hash::make('password'),
+                'faculty_institution' => 'FACULTAD DE CIENCIAS INFORMATICAS',
+                'role_id' => $docenteRole?->id,
+            ]
+        );
+        $attach($docenteDecano, ['docente', 'responsable_facultad']);
         $driver2 = Driver::firstOrCreate(
             ['user_id' => $userDriver2->id],
             [
@@ -346,19 +400,24 @@ class DatabaseSeeder extends Seeder
                 );
             }
 
-            // Sembrar rol de pasajero/estudiante y usuario estudiante
-            $pasajeroRole = Role::where('name', 'pasajero')->first();
+            $estudianteRole = Role::where('name', 'estudiante')->first();
             $estudiante = User::firstOrCreate(
-                ['email' => 'estudiante@test.com'],
+                ['email' => 'e1314433382@live.uleam.edu.ec'],
                 [
-                    'national_id' => '1308888888',
+                    'national_id' => '1399000008',
                     'first_name' => 'Jean Pierre',
                     'last_name' => 'Mendoza (Estudiante)',
                     'password' => Hash::make('password'),
                     'faculty_institution' => 'FACULTAD DE CIENCIAS INFORMATICAS',
-                    'role_id' => $pasajeroRole ? $pasajeroRole->id : null
+                    'role_id' => $estudianteRole?->id,
                 ]
             );
+            $estudiante->syncRoleNames(['estudiante']);
+
+            $legacyEst = User::where('email', 'estudiante@test.com')->first();
+            if ($legacyEst) {
+                $legacyEst->syncRoleNames(['estudiante']);
+            }
 
             // Sembrar manifiesto de pasajeros para la primera solicitud (Quito)
             PassengerManifest::firstOrCreate(

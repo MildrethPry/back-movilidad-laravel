@@ -2,13 +2,15 @@
 
 namespace Domain\Requests\Models;
 
+use Domain\Auth\Models\Driver;
+use Domain\Auth\Models\User;
+use Domain\Vehicles\Models\Vehicle;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Domain\Vehicles\Models\Vehicle;
-use Domain\Auth\Models\Driver;
-use Domain\Auth\Models\User;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'request_id',
@@ -17,7 +19,10 @@ use Domain\Auth\Models\User;
     'transport_chief_id',
     'initial_mileage',
     'final_mileage',
-    'trip_status'
+    'trip_status',
+    'driver_response',
+    'driver_reject_reason',
+    'driver_responded_at',
 ])]
 class RouteSheet extends Model
 {
@@ -25,51 +30,50 @@ class RouteSheet extends Model
 
     protected $table = 'route_sheets';
 
-    /**
-     * Obtener la solicitud asociada con esta hoja de ruta.
-     */
+    protected function casts(): array
+    {
+        return [
+            'driver_responded_at' => 'datetime',
+        ];
+    }
+
     public function request(): BelongsTo
     {
         return $this->belongsTo(MobilizationRequest::class, 'request_id');
     }
 
-    /**
-     * Obtener el vehículo asignado a esta hoja de ruta.
-     */
     public function vehicle(): BelongsTo
     {
         return $this->belongsTo(Vehicle::class, 'vehicle_id');
     }
 
-    /**
-     * Obtener el chofer asignado a esta hoja de ruta.
-     */
     public function driver(): BelongsTo
     {
         return $this->belongsTo(Driver::class, 'driver_id');
     }
 
-    /**
-     * Obtener el jefe de transporte (Usuario) que autorizó esta hoja de ruta.
-     */
     public function transportChief(): BelongsTo
     {
         return $this->belongsTo(User::class, 'transport_chief_id');
     }
 
-    /**
-     * Obtener las evaluaciones de viaje asociadas con esta hoja de ruta.
-     */
-    public function evaluations(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function evaluations(): HasMany
     {
         return $this->hasMany(TripEvaluation::class, 'route_sheet_id');
     }
 
-    /**
-     * Obtener la liquidación/compensación de chofer asociada con esta hoja de ruta.
-     */
-    public function compensation(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function compensation(): HasOne
     {
         return $this->hasOne(DriverCompensation::class, 'route_sheet_id');
+    }
+
+    public function stops(): HasMany
+    {
+        return $this->hasMany(RouteSheetStop::class, 'route_sheet_id')->orderBy('sequence');
+    }
+
+    public function fuelOrders(): HasMany
+    {
+        return $this->hasMany(FuelOrder::class, 'route_sheet_id');
     }
 }

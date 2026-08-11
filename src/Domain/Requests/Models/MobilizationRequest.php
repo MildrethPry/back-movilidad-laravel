@@ -2,12 +2,13 @@
 
 namespace Domain\Requests\Models;
 
+use Domain\Auth\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Domain\Auth\Models\User;
 
 #[Fillable([
     'requester_id',
@@ -20,7 +21,10 @@ use Domain\Auth\Models\User;
     'estimated_days',
     'projected_cost',
     'status',
-    'rectorate_approver_id'
+    'rectorate_approver_id',
+    'secretaria_approver_id',
+    'secretaria_observation',
+    'confirmation_deadline',
 ])]
 class MobilizationRequest extends Model
 {
@@ -36,38 +40,37 @@ class MobilizationRequest extends Model
             'departure_date' => 'date',
             'return_date' => 'date',
             'projected_cost' => 'decimal:2',
+            'confirmation_deadline' => 'datetime',
         ];
     }
 
-    /**
-     * Obtener el solicitante (Usuario) asociado con esta solicitud.
-     */
     public function requester(): BelongsTo
     {
         return $this->belongsTo(User::class, 'requester_id');
     }
 
-    /**
-     * Obtener el autorizador del rectorado (Usuario) asociado con esta solicitud.
-     */
     public function rectorateApprover(): BelongsTo
     {
         return $this->belongsTo(User::class, 'rectorate_approver_id');
     }
 
-    /**
-     * Obtener el manifiesto de pasajeros asociado con esta solicitud.
-     */
-    public function passengers(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function secretariaApprover(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'secretaria_approver_id');
+    }
+
+    public function passengers(): HasMany
     {
         return $this->hasMany(PassengerManifest::class, 'request_id');
     }
 
-    /**
-     * Obtener la hoja de ruta asociada con esta solicitud.
-     */
     public function routeSheet(): HasOne
     {
         return $this->hasOne(RouteSheet::class, 'request_id');
+    }
+
+    public function statusHistories(): HasMany
+    {
+        return $this->hasMany(RequestStatusHistory::class, 'request_id')->orderBy('id');
     }
 }

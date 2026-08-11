@@ -34,7 +34,7 @@ class MobilizationRequestData
             return_date: $request->input('return_date'),
             estimated_days: $estimatedDays,
             projected_cost: $projectedCost,
-            status: $request->input('mobilization_type') === 'externa' ? 'pendiente_rectorado' : 'pendiente'
+            status: 'pendiente_secretaria'
         );
     }
 }
