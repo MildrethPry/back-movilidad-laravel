@@ -17,7 +17,7 @@ class DriverFuelOrdersController extends Controller
         }
 
         // Si es el Jefe de Transporte, devolvemos todos los vales
-        if ($user->role && $user->role->name === 'jefe_transporte') {
+        if ($user->hasRole(['secretaria', 'jefe_transporte'])) {
             $fuelOrders = FuelOrder::with([
                 'routeSheet.vehicle',
                 'routeSheet.driver.user',

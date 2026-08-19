@@ -15,8 +15,8 @@ class RouteSheetStoreController extends Controller
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        if (!$user || !$user->role || $user->role->name !== 'jefe_transporte') {
-            return response()->json(['message' => 'Acceso denegado: Solo el Jefe de Transporte puede asignar recursos.'], 403);
+        if (! $user || ! $user->hasRole(['secretaria', 'jefe_transporte'])) {
+            return response()->json(['message' => 'Acceso denegado: Solo Secretaría puede asignar recursos.'], 403);
         }
 
         $request->validate([

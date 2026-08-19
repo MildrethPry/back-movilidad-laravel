@@ -11,23 +11,28 @@ class VehicleListController extends Controller
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        if (!$user || !$user->role || $user->role->name !== 'jefe_transporte') {
+        if (! $user || ! $user->hasRole(['secretaria', 'jefe_transporte'])) {
             return response()->json(['message' => 'Acceso denegado.'], 403);
         }
 
         $vehicles = Vehicle::all()->map(function ($vehicle) {
             $oilChangeRequired = $vehicle->current_mileage >= $vehicle->next_oil_change_mileage;
-            
-            // Estado derivado para el frontend
-            $statusLabel = 'available'; // Habilitado
+
+            $statusLabel = 'available';
             $statusDetails = 'Disponible';
 
-            if ($vehicle->operational_status !== 'disponible') {
+            if ($vehicle->operational_status === 'en_viaje') {
+                $statusLabel = 'on_trip';
+                $statusDetails = 'En viaje / asignación activa';
+            } elseif ($vehicle->operational_status === 'en_taller') {
                 $statusLabel = 'in_maintenance';
-                $statusDetails = 'En mantenimiento/Taller';
+                $statusDetails = 'En taller / mantenimiento';
+            } elseif ($vehicle->operational_status === 'inactivo') {
+                $statusLabel = 'inactive';
+                $statusDetails = 'Inactivo';
             } elseif ($oilChangeRequired) {
                 $statusLabel = 'blocked_oil';
-                $statusDetails = 'Bloqueado: Requiere cambio de aceite';
+                $statusDetails = 'Bloqueado: requiere cambio de aceite';
             }
 
             return [
@@ -43,7 +48,7 @@ class VehicleListController extends Controller
                 'operational_status' => $vehicle->operational_status,
                 'status_label' => $statusLabel,
                 'status_details' => $statusDetails,
-                'is_selectable' => ($vehicle->operational_status === 'disponible' && !$oilChangeRequired)
+                'is_selectable' => ($vehicle->operational_status === 'disponible' && ! $oilChangeRequired),
             ];
         });
 

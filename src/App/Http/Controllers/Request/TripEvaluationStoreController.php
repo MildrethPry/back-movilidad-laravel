@@ -21,19 +21,28 @@ class TripEvaluationStoreController extends Controller
 
         $request->validate([
             'hoja_ruta_id' => 'required|integer|exists:route_sheets,id',
-            'pasajero_id' => 'required|integer|exists:users,id',
             'calificacion_conductor' => 'required|integer|min:1|max:5',
             'calificacion_vehiculo' => 'required|integer|min:1|max:5',
-            'comments' => 'nullable|string',
+            'comments' => 'nullable|string|max:1000',
         ]);
 
         $routeSheetId = (int) $request->input('hoja_ruta_id');
-        $passengerId = (int) $request->input('pasajero_id');
+        // Evita IDOR: la evaluación siempre es del usuario autenticado.
+        $passengerId = (int) $user->id;
         $driverRating = (int) $request->input('calificacion_conductor');
         $vehicleRating = (int) $request->input('calificacion_vehiculo');
         $comments = $request->input('comments');
 
-        $routeSheet = RouteSheet::findOrFail($routeSheetId);
+        $routeSheet = RouteSheet::with('request')->findOrFail($routeSheetId);
+
+        $isRequester = $routeSheet->request?->requester_id === $user->id;
+        $isPassenger = $routeSheet->request
+            ? $routeSheet->request->passengers()->where('user_id', $user->id)->exists()
+            : false;
+
+        if (! $isRequester && ! $isPassenger) {
+            return response()->json(['message' => 'Solo participantes del viaje pueden evaluar.'], 403);
+        }
 
         // Check if this passenger already evaluated this route sheet
         $existing = TripEvaluation::where('route_sheet_id', $routeSheetId)

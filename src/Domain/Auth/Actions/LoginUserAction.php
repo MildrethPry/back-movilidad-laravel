@@ -8,28 +8,28 @@ use Illuminate\Validation\ValidationException;
 
 class LoginUserAction
 {
-    /**
-     * Ejecuta el login de un usuario, validando sus credenciales y retornando un token Sanctum.
-     */
     public function execute(string $email, string $password): array
     {
         $user = User::where('email', $email)->first();
 
-        if (!$user || !Hash::check($password, $user->password)) {
+        if (! $user || ! Hash::check($password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['Las credenciales proporcionadas son incorrectas.'],
             ]);
         }
 
-        // Limpiar tokens anteriores para mantener una sesión limpia
         $user->tokens()->delete();
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        if ($user->role_id && $user->roles()->count() === 0) {
+            $user->roles()->syncWithoutDetaching([$user->role_id]);
+        }
+
         return [
-            'user' => $user->load('role'),
+            'user' => $user->toAuthArray(),
             'access_token' => $token,
-            'token_type' => 'Bearer'
+            'token_type' => 'Bearer',
         ];
     }
 }

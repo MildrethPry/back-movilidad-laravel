@@ -3,19 +3,22 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class MeController extends Controller
 {
-    /**
-     * Controlador para obtener los detalles del usuario autenticado.
-     */
     public function __invoke(Request $request): JsonResponse
     {
+        $user = $request->user();
+
+        if ($user->role_id && $user->roles()->count() === 0) {
+            $user->roles()->syncWithoutDetaching([$user->role_id]);
+        }
+
         return response()->json([
             'status' => 'success',
-            'data' => $request->user()->load('role')
-        ], 200);
+            'data' => $user->toAuthArray(),
+        ]);
     }
 }
