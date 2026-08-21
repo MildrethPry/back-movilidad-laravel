@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable([
     'act_id',
     'component_id',
-    'physical_condition'
+    'physical_condition',
 ])]
 class ActChecklistDetail extends Model
 {

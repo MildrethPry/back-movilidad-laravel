@@ -3,31 +3,49 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Domain\Requests\Models\MobilizationRequest;
+use Illuminate\Http\Request;
 
 class SolicitudListController extends Controller
 {
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
-        $roleName = $user->role ? $user->role->name : '';
+        $query = MobilizationRequest::with([
+            'requester',
+            'rectorateApprover',
+            'secretariaApprover',
+            'routeSheet.driver.user',
+            'routeSheet.vehicle',
+            'passengers',
+        ]);
 
-        $query = MobilizationRequest::with(['requester', 'rectorateApprover']);
-
-        if ($roleName === 'rector') {
-            // Rector ve las pendientes de rectorado y las que ya aprobó/rechazó
-            $query->whereIn('status', ['pendiente_rectorado', 'aprobado_rectorado', 'rechazada']);
-        } elseif ($roleName === 'jefe_transporte') {
-            // Jefe de Transporte ve todas las solicitudes que están listas para asignar recursos, o que ya fueron aprobadas
-            $query->whereIn('status', ['pendiente', 'aprobado_rectorado', 'aprobada', 'rechazada']);
+        if ($user->hasRole(['vicerrector', 'rector'])) {
+            $query->whereIn('status', ['pendiente_rectorado', 'aprobado_rectorado', 'rechazada', 'aprobada']);
+        } elseif ($user->hasRole(['secretaria', 'jefe_transporte'])) {
+            // ve todo el flujo operativo
+        } elseif ($user->hasRole(['responsable_facultad'])) {
+            $query->whereHas('requester', function ($q) use ($user) {
+                $q->where('faculty_institution', $user->faculty_institution);
+            });
         } else {
-            // Solicitante común o chofer ve sus propias solicitudes creadas
             $query->where('requester_id', $user->id);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->query('status'));
+        }
+
+        if ($request->filled('from')) {
+            $query->whereDate('departure_date', '>=', $request->query('from'));
+        }
+
+        if ($request->filled('to')) {
+            $query->whereDate('departure_date', '<=', $request->query('to'));
         }
 
         $requests = $query->orderBy('created_at', 'desc')->get();

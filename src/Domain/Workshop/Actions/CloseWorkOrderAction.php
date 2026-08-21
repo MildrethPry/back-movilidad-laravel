@@ -2,12 +2,12 @@
 
 namespace Domain\Workshop\Actions;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
-use Domain\Workshop\Models\WorkshopWorkOrder;
 use Domain\Workshop\Models\SupplyInventory;
 use Domain\Workshop\Models\WorkOrderSupplyProvision;
+use Domain\Workshop\Models\WorkshopWorkOrder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class CloseWorkOrderAction
 {
@@ -25,7 +25,7 @@ class CloseWorkOrderAction
 
             if ($workOrder->exit_date) {
                 throw ValidationException::withMessages([
-                    'work_order_id' => ['Esta orden de trabajo ya ha sido cerrada anteriormente.']
+                    'work_order_id' => ['Esta orden de trabajo ya ha sido cerrada anteriormente.'],
                 ]);
             }
 
@@ -35,7 +35,7 @@ class CloseWorkOrderAction
 
                 if ($supply->current_stock < $item['quantity']) {
                     throw ValidationException::withMessages([
-                        'insumos' => ["Stock insuficiente para el insumo '{$supply->supply_name}'. Stock actual: {$supply->current_stock}, Requerido: {$item['quantity']}."]
+                        'insumos' => ["Stock insuficiente para el insumo '{$supply->supply_name}'. Stock actual: {$supply->current_stock}, Requerido: {$item['quantity']}."],
                     ]);
                 }
 
@@ -46,18 +46,18 @@ class CloseWorkOrderAction
                 WorkOrderSupplyProvision::create([
                     'work_order_id' => $workOrder->id,
                     'supply_id' => $item['id'],
-                    'quantity_used' => $item['quantity']
+                    'quantity_used' => $item['quantity'],
                 ]);
             }
 
             // 3. Registrar fecha de egreso (exit_date)
             $workOrder->update([
-                'exit_date' => Carbon::now()
+                'exit_date' => Carbon::now(),
             ]);
 
             // 4. Reglas del Vehículo al salir del taller
             $vehicleData = [
-                'operational_status' => 'disponible'
+                'operational_status' => 'disponible',
             ];
 
             if ($workOrder->maintenance_type === 'cambio_aceite') {
@@ -69,7 +69,7 @@ class CloseWorkOrderAction
             // 5. Solventar la novedad asociada (si existe)
             if ($workOrder->issueLog) {
                 $workOrder->issueLog->update([
-                    'status' => 'solventado'
+                    'status' => 'solventado',
                 ]);
             }
 

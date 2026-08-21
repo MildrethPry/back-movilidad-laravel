@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'overtime_100_amount',
     'total_payout',
     'payment_receipt_url',
-    'payment_status'
+    'payment_status',
 ])]
 class DriverCompensation extends Model
 {
@@ -29,7 +29,7 @@ class DriverCompensation extends Model
         'allowances_amount' => 'float',
         'overtime_50_amount' => 'float',
         'overtime_100_amount' => 'float',
-        'total_payout' => 'float'
+        'total_payout' => 'float',
     ];
 
     public function routeSheet(): BelongsTo

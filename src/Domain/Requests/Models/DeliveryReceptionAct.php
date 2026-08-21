@@ -2,12 +2,12 @@
 
 namespace Domain\Requests\Models;
 
+use Domain\Auth\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Domain\Auth\Models\User;
 
 #[Fillable([
     'route_sheet_id',
@@ -15,7 +15,7 @@ use Domain\Auth\Models\User;
     'registration_type',
     'fuel_level',
     'checkpoint_mileage',
-    'general_observations'
+    'general_observations',
 ])]
 class DeliveryReceptionAct extends Model
 {

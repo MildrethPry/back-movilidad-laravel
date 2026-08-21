@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Domain\Requests\Actions\CreateRouteSheetAction;
+use Illuminate\Http\Request;
 
 class RouteSheetStoreController extends Controller
 {
@@ -15,8 +15,8 @@ class RouteSheetStoreController extends Controller
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        if (!$user || !$user->role || $user->role->name !== 'jefe_transporte') {
-            return response()->json(['message' => 'Acceso denegado: Solo el Jefe de Transporte puede asignar recursos.'], 403);
+        if (! $user || ! $user->hasRole(['secretaria', 'jefe_transporte'])) {
+            return response()->json(['message' => 'Acceso denegado: Solo Secretaría puede asignar recursos.'], 403);
         }
 
         $request->validate([
@@ -39,7 +39,7 @@ class RouteSheetStoreController extends Controller
 
         return response()->json([
             'message' => 'Recursos asignados y hoja de ruta emitida exitosamente.',
-            'route_sheet' => $routeSheet
+            'route_sheet' => $routeSheet,
         ], 201);
     }
 }

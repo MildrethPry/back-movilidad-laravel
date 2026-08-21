@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'document_type',
     'issue_date',
     'expiration_date',
-    'pdf_file'
+    'pdf_file',
 ])]
 class VehicleLegalDocument extends Model
 {

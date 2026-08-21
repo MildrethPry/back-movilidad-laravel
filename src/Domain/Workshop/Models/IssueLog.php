@@ -2,13 +2,13 @@
 
 namespace Domain\Workshop\Models;
 
+use Domain\Auth\Models\User;
+use Domain\Requests\Models\RouteSheet;
+use Domain\Vehicles\Models\Vehicle;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Domain\Vehicles\Models\Vehicle;
-use Domain\Requests\Models\RouteSheet;
-use Domain\Auth\Models\User;
 
 #[Fillable([
     'vehicle_id',
@@ -16,7 +16,7 @@ use Domain\Auth\Models\User;
     'reporting_driver_id',
     'breakdown_date',
     'description',
-    'status'
+    'status',
 ])]
 class IssueLog extends Model
 {
@@ -27,7 +27,7 @@ class IssueLog extends Model
     public $timestamps = false;
 
     protected $casts = [
-        'breakdown_date' => 'date'
+        'breakdown_date' => 'date',
     ];
 
     public function vehicle(): BelongsTo

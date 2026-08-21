@@ -2,16 +2,19 @@
 
 namespace Domain\Requests\Models;
 
+use Domain\Auth\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Domain\Auth\Models\User;
 
 #[Fillable([
     'request_id',
     'user_id',
-    'attended'
+    'attended',
+    'invitation_status',
+    'reject_reason',
+    'responded_at',
 ])]
 class PassengerManifest extends Model
 {
@@ -21,9 +24,13 @@ class PassengerManifest extends Model
 
     public $timestamps = false;
 
-    protected $casts = [
-        'attended' => 'boolean'
-    ];
+    protected function casts(): array
+    {
+        return [
+            'attended' => 'boolean',
+            'responded_at' => 'datetime',
+        ];
+    }
 
     public function request(): BelongsTo
     {

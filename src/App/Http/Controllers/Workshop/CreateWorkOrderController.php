@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Workshop;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Domain\Workshop\Models\WorkshopWorkOrder;
-use Domain\Workshop\Models\IssueLog;
 use Carbon\Carbon;
+use Domain\Workshop\Models\IssueLog;
+use Domain\Workshop\Models\WorkshopWorkOrder;
+use Illuminate\Http\Request;
 
 class CreateWorkOrderController extends Controller
 {
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'No autenticado.'], 401);
         }
 
@@ -41,19 +41,19 @@ class CreateWorkOrderController extends Controller
             'maintenance_type' => $request->input('maintenance_type'),
             'work_details' => $request->input('work_details'),
             'entry_date' => Carbon::now(),
-            'exit_date' => null
+            'exit_date' => null,
         ]);
 
         // Si está amarrada a una novedad, cambiar estado a 'en_revision'
         if ($issueLogId) {
             IssueLog::where('id', $issueLogId)->update([
-                'status' => 'en_revision'
+                'status' => 'en_revision',
             ]);
         }
 
         return response()->json([
             'message' => 'Orden de trabajo de taller generada con éxito.',
-            'work_order' => $workOrder
+            'work_order' => $workOrder,
         ], 201);
     }
 }

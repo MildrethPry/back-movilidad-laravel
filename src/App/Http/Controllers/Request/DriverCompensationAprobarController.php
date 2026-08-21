@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\DB;
-use Domain\Requests\Models\RouteSheet;
 use Domain\Requests\Models\DriverCompensation;
+use Domain\Requests\Models\RouteSheet;
+use Illuminate\Support\Facades\DB;
 
 class DriverCompensationAprobarController extends Controller
 {
@@ -14,29 +14,34 @@ class DriverCompensationAprobarController extends Controller
         $hojaRutaId = (int) $hoja_ruta_id;
 
         $compensation = DriverCompensation::where('route_sheet_id', $hojaRutaId)->firstOrFail();
-        $routeSheet = RouteSheet::with('driver')->findOrFail($hojaRutaId);
+        $routeSheet = RouteSheet::with(['driver', 'vehicle'])->findOrFail($hojaRutaId);
 
         DB::transaction(function () use ($compensation, $routeSheet) {
             // 1. Cambiar estado_pago = verificado_movilidad
             $compensation->update([
-                'payment_status' => 'verificado_movilidad'
+                'payment_status' => 'verificado_movilidad',
             ]);
 
             // 2. Mudar hojas_ruta.estado_viaje = finalizado
             $routeSheet->update([
-                'trip_status' => 'finalizado'
+                'trip_status' => 'finalizado',
             ]);
 
             // 3. Liberar al chofer
             $routeSheet->driver->update([
-                'is_available' => true
+                'is_available' => true,
+            ]);
+
+            // 4. Liberar el vehículo de vuelta a patio
+            $routeSheet->vehicle->update([
+                'operational_status' => 'disponible',
             ]);
         });
 
         return response()->json([
             'message' => 'Comisión liquidada y cerrada financieramente con éxito. El chofer está liberado.',
             'compensation' => $compensation->fresh(),
-            'route_sheet' => $routeSheet->fresh()
+            'route_sheet' => $routeSheet->fresh(),
         ]);
     }
 }

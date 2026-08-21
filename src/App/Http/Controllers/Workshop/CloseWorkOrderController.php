@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Workshop;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Domain\Workshop\Actions\CloseWorkOrderAction;
+use Illuminate\Http\Request;
 
 class CloseWorkOrderController extends Controller
 {
@@ -15,7 +15,7 @@ class CloseWorkOrderController extends Controller
     public function __invoke(Request $request, $id)
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'No autenticado.'], 401);
         }
 
@@ -34,7 +34,7 @@ class CloseWorkOrderController extends Controller
 
         return response()->json([
             'message' => 'Unidad reparada con éxito. Vehículo liberado para circulación.',
-            'work_order' => $workOrder
+            'work_order' => $workOrder,
         ]);
     }
 }

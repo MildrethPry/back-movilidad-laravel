@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Domain\Auth\Models\Driver;
 use Carbon\Carbon;
+use Domain\Auth\Models\Driver;
+use Illuminate\Http\Request;
 
 class DriverListController extends Controller
 {
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        if (!$user || !$user->role || $user->role->name !== 'jefe_transporte') {
+        if (! $user || ! $user->hasRole(['secretaria', 'jefe_transporte'])) {
             return response()->json(['message' => 'Acceso denegado.'], 403);
         }
 
@@ -27,10 +27,10 @@ class DriverListController extends Controller
             $statusDetails = 'Disponible';
             $statusLabel = 'available';
 
-            if (!$driver->is_available) {
+            if (! $driver->is_available) {
                 $statusDetails = 'En viaje / No disponible';
                 $statusLabel = 'on_trip';
-            } elseif (!$activeLicense) {
+            } elseif (! $activeLicense) {
                 $latestLicense = $driver->licenses()->first();
                 if ($latestLicense) {
                     if ($latestLicense->current_points <= 0) {
@@ -51,7 +51,11 @@ class DriverListController extends Controller
 
             return [
                 'id' => $driver->id,
-                'name' => $driver->user ? ($driver->user->first_name . ' ' . $driver->user->last_name) : 'Chofer sin nombre',
+                'user_id' => $driver->user_id,
+                'name' => $driver->user ? ($driver->user->first_name.' '.$driver->user->last_name) : 'Chofer sin nombre',
+                'first_name' => $driver->user?->first_name ?? '',
+                'last_name' => $driver->user?->last_name ?? '',
+                'email' => $driver->user?->email,
                 'national_id' => $driver->user ? $driver->user->national_id : '',
                 'contract_type' => $driver->contract_type,
                 'is_available' => $driver->is_available,
@@ -60,7 +64,7 @@ class DriverListController extends Controller
                 'expiration_date' => $activeLicense ? $activeLicense->expiration_date : ($driver->licenses()->first() ? $driver->licenses()->first()->expiration_date : 'N/A'),
                 'status_label' => $statusLabel,
                 'status_details' => $statusDetails,
-                'is_selectable' => $isSelectable
+                'is_selectable' => $isSelectable,
             ];
         });
 

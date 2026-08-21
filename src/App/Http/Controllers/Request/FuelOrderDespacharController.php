@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Domain\Requests\Actions\DispatchFuelOrderAction;
+use Illuminate\Http\Request;
 
 class FuelOrderDespacharController extends Controller
 {
@@ -30,7 +30,7 @@ class FuelOrderDespacharController extends Controller
 
         return response()->json([
             'message' => 'Transacción Registrada - Liquidación enviada a la Sección de Transporte ULEAM.',
-            'fuel_order' => $fuelOrder
+            'fuel_order' => $fuelOrder,
         ]);
     }
 }

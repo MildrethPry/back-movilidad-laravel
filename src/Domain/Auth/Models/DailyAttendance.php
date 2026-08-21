@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'date',
     'check_in_time',
     'check_out_time',
-    'notes'
+    'notes',
 ])]
 class DailyAttendance extends Model
 {

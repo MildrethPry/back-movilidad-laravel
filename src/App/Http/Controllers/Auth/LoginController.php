@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Domain\Auth\Actions\LoginUserAction;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -18,14 +18,14 @@ class LoginController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
-            'password' => 'required|string'
+            'password' => 'required|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Error de validación',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -38,12 +38,12 @@ class LoginController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => 'Sesión iniciada exitosamente',
-                'data' => $data
+                'data' => $data,
             ], 200);
         } catch (ValidationException $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Las credenciales proporcionadas son incorrectas.'
+                'message' => 'Las credenciales proporcionadas son incorrectas.',
             ], 401);
         }
     }

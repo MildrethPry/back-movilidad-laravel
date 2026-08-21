@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'tire_position',
     'tire_brand',
     'psi',
-    'wear_level_condition'
+    'wear_level_condition',
 ])]
 class ActTireState extends Model
 {

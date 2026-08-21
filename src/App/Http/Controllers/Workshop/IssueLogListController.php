@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Workshop;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Domain\Workshop\Models\IssueLog;
 use Domain\Workshop\Models\WorkshopWorkOrder;
+use Illuminate\Http\Request;
 
 class IssueLogListController extends Controller
 {
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'No autenticado.'], 401);
         }
 
@@ -30,7 +30,7 @@ class IssueLogListController extends Controller
 
         return response()->json([
             'issues' => $issues,
-            'work_orders' => $workOrders
+            'work_orders' => $workOrders,
         ]);
     }
 }

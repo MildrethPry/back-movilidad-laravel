@@ -123,4 +123,7 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'pagination_per_page' => (int) env('PAGINATION_PER_PAGE', 10),
+    'student_search_per_page' => (int) env('STUDENT_SEARCH_PER_PAGE', env('PAGINATION_PER_PAGE', 10)),
+
 ];

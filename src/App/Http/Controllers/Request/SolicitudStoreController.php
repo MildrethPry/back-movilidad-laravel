@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
+use Domain\Requests\Actions\CreateMobilizationRequestAction;
+use Domain\Requests\DataTransferObjects\MobilizationRequestData;
+use Domain\Requests\Models\RateConfiguration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon;
-use Domain\Requests\Models\RateConfiguration;
-use Domain\Requests\DataTransferObjects\MobilizationRequestData;
-use Domain\Requests\Actions\CreateMobilizationRequestAction;
 
 class SolicitudStoreController extends Controller
 {
@@ -25,11 +25,17 @@ class SolicitudStoreController extends Controller
             'destination' => 'required|string|max:150',
             'travel_reason' => 'required|string|max:500',
             'departure_date' => 'required|date|after_or_equal:today',
+            'departure_time' => 'required|date_format:H:i',
             'return_date' => 'required|date|after_or_equal:departure_date',
-            'declaracion_fondos_aceptada' => 'nullable|boolean'
+            'return_time' => 'required|date_format:H:i',
+            'declaracion_fondos_aceptada' => 'nullable|boolean',
         ], [
             'departure_date.after_or_equal' => 'La fecha de salida no puede ser anterior a la fecha de hoy.',
             'return_date.after_or_equal' => 'La fecha de retorno debe ser igual o posterior a la fecha de salida.',
+            'departure_time.required' => 'La hora de salida es requerida.',
+            'departure_time.date_format' => 'La hora de salida debe tener un formato válido (HH:mm).',
+            'return_time.required' => 'La hora de retorno es requerida.',
+            'return_time.date_format' => 'La hora de retorno debe tener un formato válido (HH:mm).',
             'destination.required' => 'El destino de la movilización es requerido.',
             'travel_reason.required' => 'El motivo de viaje es requerido.',
         ]);
@@ -39,9 +45,9 @@ class SolicitudStoreController extends Controller
         }
 
         // 2. Pre-cálculo financiero
-        $departure = Carbon::parse($request->input('departure_date'));
-        $return = Carbon::parse($request->input('return_date'));
-        $estimatedDays = $departure->diffInDays($return) + 1;
+        $departure = Carbon::parse($request->input('departure_date'))->startOfDay();
+        $return = Carbon::parse($request->input('return_date'))->startOfDay();
+        $estimatedDays = (int) $departure->diffInDays($return) + 1;
 
         $dailyAllowanceRate = RateConfiguration::where('rate_key', 'viatico_diario')->value('rate_value') ?? 80.00;
         $overtimeRate50 = RateConfiguration::where('rate_key', 'extra_50')->value('rate_value') ?? 5.00;
@@ -51,7 +57,7 @@ class SolicitudStoreController extends Controller
         $projectedCost = ($estimatedDays * $dailyAllowanceRate) + $overtimeEstimate;
 
         // 3. Si no ha aceptado la declaración legal, responder con la simulación
-        if (!$request->input('declaracion_fondos_aceptada')) {
+        if (! $request->input('declaracion_fondos_aceptada')) {
             $formattedCost = number_format($projectedCost, 2);
             $formattedDaily = number_format($dailyAllowanceRate, 2);
             $formattedOvertime = number_format($overtimeEstimate, 2);
@@ -62,15 +68,15 @@ class SolicitudStoreController extends Controller
                 'requires_confirmation' => true,
                 'projected_cost' => $projectedCost,
                 'estimated_days' => $estimatedDays,
-                'daily_rate' => (float)$dailyAllowanceRate,
+                'daily_rate' => (float) $dailyAllowanceRate,
                 'overtime_estimate' => $overtimeEstimate,
-                'message' => $warningMessage
+                'message' => $warningMessage,
             ]);
         }
 
         // 4. Si ya está confirmada, proceder a guardar utilizando la acción
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
@@ -79,7 +85,7 @@ class SolicitudStoreController extends Controller
 
         return response()->json([
             'message' => 'Solicitud de movilización registrada exitosamente.',
-            'request' => $mobilizationRequest
+            'request' => $mobilizationRequest,
         ], 201);
     }
 }

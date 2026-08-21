@@ -2,11 +2,11 @@
 
 namespace Domain\Vehicles\Models;
 
+use Domain\Requests\Models\RouteSheet;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Domain\Requests\Models\RouteSheet;
 
 #[Fillable([
     'plate',
@@ -17,7 +17,7 @@ use Domain\Requests\Models\RouteSheet;
     'fuel_type',
     'current_mileage',
     'next_oil_change_mileage',
-    'operational_status'
+    'operational_status',
 ])]
 class Vehicle extends Model
 {
