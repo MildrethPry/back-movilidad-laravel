@@ -2,18 +2,18 @@
 
 namespace Domain\Requests\Models;
 
+use Domain\Auth\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Domain\Auth\Models\User;
 
 #[Fillable([
     'route_sheet_id',
     'passenger_id',
     'driver_rating',
     'vehicle_rating',
-    'comments'
+    'comments',
 ])]
 class TripEvaluation extends Model
 {
@@ -26,7 +26,7 @@ class TripEvaluation extends Model
     protected $casts = [
         'driver_rating' => 'integer',
         'vehicle_rating' => 'integer',
-        'created_at' => 'datetime'
+        'created_at' => 'datetime',
     ];
 
     public function routeSheet(): BelongsTo

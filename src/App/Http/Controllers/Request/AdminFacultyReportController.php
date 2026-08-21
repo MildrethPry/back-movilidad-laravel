@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
+use Domain\Requests\Models\MobilizationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Domain\Requests\Models\MobilizationRequest;
-use Carbon\Carbon;
 
 class AdminFacultyReportController extends Controller
 {
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        if (!$user || $user->role->name !== 'jefe_transporte') {
+        if (! $user || $user->role->name !== 'jefe_transporte') {
             return response()->json(['message' => 'No autorizado.'], 403);
         }
 
@@ -32,7 +32,7 @@ class AdminFacultyReportController extends Controller
         if ($startDate && $endDate) {
             $query->whereBetween('mobilization_requests.departure_date', [
                 Carbon::parse($startDate)->startOfDay(),
-                Carbon::parse($endDate)->endOfDay()
+                Carbon::parse($endDate)->endOfDay(),
             ]);
         }
 

@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
+use Domain\Requests\Models\DeliveryReceptionAct;
+use Domain\Requests\Models\RouteSheet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Domain\Requests\Models\RouteSheet;
-use Domain\Requests\Models\DeliveryReceptionAct;
 
 class DeliveryReceptionActArrivalController extends Controller
 {
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'No autenticado.'], 401);
         }
 
@@ -38,7 +38,7 @@ class DeliveryReceptionActArrivalController extends Controller
 
         if ($routeSheet->initial_mileage && $kilometraje < $routeSheet->initial_mileage) {
             return response()->json([
-                'message' => "El kilometraje de llegada ({$kilometraje}) no puede ser menor al de salida ({$routeSheet->initial_mileage})."
+                'message' => "El kilometraje de llegada ({$kilometraje}) no puede ser menor al de salida ({$routeSheet->initial_mileage}).",
             ], 422);
         }
 
@@ -50,25 +50,25 @@ class DeliveryReceptionActArrivalController extends Controller
                 'registration_type' => 'llegada',
                 'fuel_level' => $fuelLevel,
                 'checkpoint_mileage' => $kilometraje,
-                'general_observations' => 'Retorno de comisión registrado en garita.'
+                'general_observations' => 'Retorno de comisión registrado en garita.',
             ]);
 
             // Actualizar la hoja de ruta
             $routeSheet->update([
                 'final_mileage' => $kilometraje,
-                'trip_status' => 'pendiente_feedback'
+                'trip_status' => 'pendiente_feedback',
             ]);
 
             // Liberar temporalmente el vehículo a disponible
             $vehicle->update([
                 'operational_status' => 'disponible',
-                'current_mileage' => $kilometraje
+                'current_mileage' => $kilometraje,
             ]);
         });
 
         return response()->json([
             'message' => 'Llegada registrada exitosamente. Pendiente de co-evaluación de los pasajeros.',
-            'route_sheet' => $routeSheet->fresh()
+            'route_sheet' => $routeSheet->fresh(),
         ]);
     }
 }

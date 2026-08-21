@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'driver_id',
     'license_type',
     'current_points',
-    'expiration_date'
+    'expiration_date',
 ])]
 class DriverLicense extends Model
 {

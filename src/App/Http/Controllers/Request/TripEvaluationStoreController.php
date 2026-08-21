@@ -3,19 +3,19 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use Domain\Requests\Models\RouteSheet;
 use Domain\Requests\Models\TripEvaluation;
 use Domain\Workshop\Models\IssueLog;
-use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TripEvaluationStoreController extends Controller
 {
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'No autenticado.'], 401);
         }
 
@@ -60,7 +60,7 @@ class TripEvaluationStoreController extends Controller
                 'passenger_id' => $passengerId,
                 'driver_rating' => $driverRating,
                 'vehicle_rating' => $vehicleRating,
-                'comments' => $comments
+                'comments' => $comments,
             ]);
 
             // 2. Calcular promedio de calificación del vehículo
@@ -69,20 +69,20 @@ class TripEvaluationStoreController extends Controller
             // 3. Si cae debajo de 3.0, trigger de alerta en libro de novedades
             if ($averageVehicleRating < 3.0) {
                 $description = "Alerta automática: Pasajeros reportan bajo confort o desperfectos técnicos en el viaje ID {$routeSheet->id}";
-                
+
                 // Evitar alertas duplicadas
                 $duplicate = IssueLog::where('route_sheet_id', $routeSheet->id)
                     ->where('description', 'like', 'Alerta automática%')
                     ->exists();
 
-                if (!$duplicate) {
+                if (! $duplicate) {
                     IssueLog::create([
                         'vehicle_id' => $routeSheet->vehicle_id,
                         'route_sheet_id' => $routeSheet->id,
                         'reporting_driver_id' => $passengerId, // usuario pasajero que gatilla la alerta
                         'breakdown_date' => Carbon::today(),
                         'description' => $description,
-                        'status' => 'pendiente'
+                        'status' => 'pendiente',
                     ]);
                 }
             }
@@ -92,7 +92,7 @@ class TripEvaluationStoreController extends Controller
 
         return response()->json([
             'message' => 'Muchas gracias por tu feedback. Evaluación registrada exitosamente.',
-            'evaluation' => $evaluation
+            'evaluation' => $evaluation,
         ], 201);
     }
 }

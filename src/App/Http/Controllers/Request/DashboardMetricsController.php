@@ -3,18 +3,18 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Domain\Requests\Models\MobilizationRequest;
-use Domain\Requests\Models\FuelOrder;
-use Domain\Vehicles\Models\Vehicle;
 use Domain\Auth\Models\Driver;
+use Domain\Requests\Models\FuelOrder;
+use Domain\Requests\Models\MobilizationRequest;
+use Domain\Vehicles\Models\Vehicle;
+use Illuminate\Http\Request;
 
 class DashboardMetricsController extends Controller
 {
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'No autorizado.'], 401);
         }
 
@@ -50,7 +50,7 @@ class DashboardMetricsController extends Controller
             'active_fuel_orders' => $activeFuelOrders,
             'dispatched_fuel_orders' => $dispatchedFuelOrders,
             'total_gallons' => round((float) $totalGallons, 2),
-            'total_spent' => round((float) $totalSpent, 2)
+            'total_spent' => round((float) $totalSpent, 2),
         ]);
     }
 }

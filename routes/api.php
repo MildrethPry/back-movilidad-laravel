@@ -90,7 +90,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/hojas-ruta', RouteSheetStoreController::class);
         Route::patch('/hojas-ruta/{id}/reasignar', ReassignRouteSheetController::class);
         Route::get('/agenda', AgendaController::class);
-        Route::get('/alertas', AlertsController::class);
         Route::post('/drivers', [FleetManageController::class, 'storeDriver']);
         Route::patch('/drivers/{id}', [FleetManageController::class, 'updateDriver']);
         Route::post('/vehicles', [FleetManageController::class, 'storeVehicle']);
@@ -128,13 +127,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Módulo Conductores
     Route::middleware('role:conductor,chofer')->group(function () {
-        Route::get('/mis-viajes', DriverTripsController::class);
         Route::patch('/hojas-ruta/{id}/responder', DriverRespondController::class);
         Route::get('/mi-vehiculo', MyVehicleController::class);
         Route::get('/mis-compensaciones', [DriverCompensationMineController::class, 'index']);
         Route::patch('/compensaciones/{id}/confirmar', [DriverCompensationMineController::class, 'confirm']);
         Route::get('/mis-ordenes-combustible', DriverFuelOrdersController::class);
         Route::post('/novedades', IssueLogStoreController::class);
+    });
+
+    // Viajes: el conductor ve los suyos; secretaría ve todos (para reasignación)
+    Route::middleware('role:conductor,chofer,secretaria,jefe_transporte')->group(function () {
+        Route::get('/mis-viajes', DriverTripsController::class);
     });
 
     // Módulo Taller y Mantenimiento
@@ -153,6 +156,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('role:secretaria,jefe_transporte,conductor,chofer')->group(function () {
         Route::get('/estaciones-servicio', ServiceStationListController::class);
+    });
+
+    // Alertas (campana de notificaciones)
+    Route::middleware('role:secretaria,jefe_transporte,conductor,chofer,mecanico')->group(function () {
+        Route::get('/alertas', [AlertsController::class, 'index']);
+        Route::post('/alertas/{id}/leida', [AlertsController::class, 'markRead']);
     });
 
     // Paradas, Monitoreo y Evaluaciones

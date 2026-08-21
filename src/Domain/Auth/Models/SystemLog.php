@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'action',
     'affected_table',
     'record_id',
-    'ip_address'
+    'ip_address',
 ])]
 class SystemLog extends Model
 {

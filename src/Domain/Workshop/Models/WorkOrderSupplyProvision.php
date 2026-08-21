@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable([
     'work_order_id',
     'supply_id',
-    'quantity_used'
+    'quantity_used',
 ])]
 class WorkOrderSupplyProvision extends Model
 {

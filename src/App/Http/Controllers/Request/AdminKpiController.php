@@ -3,19 +3,19 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use Domain\Requests\Models\FuelOrder;
 use Domain\Requests\Models\RouteSheet;
 use Domain\Vehicles\Models\Vehicle;
-use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AdminKpiController extends Controller
 {
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        if (!$user || $user->role->name !== 'jefe_transporte') {
+        if (! $user || $user->role->name !== 'jefe_transporte') {
             return response()->json(['message' => 'No autorizado.'], 403);
         }
 
@@ -43,7 +43,7 @@ class AdminKpiController extends Controller
             'total_gallons' => round((float) $totalGallons, 2),
             'total_km' => (int) $totalKm,
             'total_trips' => $totalTrips,
-            'vehicles_in_workshop' => $vehiclesInWorkshop
+            'vehicles_in_workshop' => $vehiclesInWorkshop,
         ]);
     }
 }

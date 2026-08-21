@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Domain\Requests\Actions\CreateFuelOrderAction;
+use Illuminate\Http\Request;
 
 class FuelOrderStoreController extends Controller
 {
@@ -15,7 +15,7 @@ class FuelOrderStoreController extends Controller
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'No autenticado.'], 401);
         }
 
@@ -35,7 +35,7 @@ class FuelOrderStoreController extends Controller
 
         return response()->json([
             'message' => 'Vale de combustible emitido con éxito.',
-            'fuel_order' => $fuelOrder
+            'fuel_order' => $fuelOrder,
         ], 201);
     }
 }

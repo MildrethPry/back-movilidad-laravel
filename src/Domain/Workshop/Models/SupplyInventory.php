@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 #[Fillable([
     'supply_name',
     'current_stock',
-    'measurement_unit'
+    'measurement_unit',
 ])]
 /**
  * Model representing supply inventories in the workshop.

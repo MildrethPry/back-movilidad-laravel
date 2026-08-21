@@ -3,31 +3,32 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Domain\Auth\Models\Driver;
 use Domain\Auth\Models\DriverLicense;
-use Domain\Auth\Models\User;
 use Domain\Auth\Models\SystemLog;
+use Domain\Auth\Models\User;
 use Domain\Requests\Models\RouteSheet;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AdminDriverController extends Controller
 {
     public function index(Request $request)
     {
         $admin = $request->user();
-        if (!$admin || $admin->role->name !== 'jefe_transporte') {
+        if (! $admin || $admin->role->name !== 'jefe_transporte') {
             return response()->json(['message' => 'No autorizado.'], 403);
         }
 
         $drivers = Driver::with(['user', 'licenses'])->get();
+
         return response()->json($drivers);
     }
 
     public function store(Request $request)
     {
         $admin = $request->user();
-        if (!$admin || $admin->role->name !== 'jefe_transporte') {
+        if (! $admin || $admin->role->name !== 'jefe_transporte') {
             return response()->json(['message' => 'No autorizado.'], 403);
         }
 
@@ -70,20 +71,20 @@ class AdminDriverController extends Controller
                 'action' => "REGISTRÓ_CHOFER: {$driver->user->first_name} {$driver->user->last_name} (Licencia Tipo {$request->input('license_type')})",
                 'affected_table' => 'drivers',
                 'record_id' => $driver->id,
-                'ip_address' => $request->ip()
+                'ip_address' => $request->ip(),
             ]);
         });
 
         return response()->json([
             'message' => 'Chofer registrado con éxito.',
-            'driver' => $driver->load(['user', 'licenses'])
+            'driver' => $driver->load(['user', 'licenses']),
         ], 210);
     }
 
     public function update(Request $request, $id)
     {
         $admin = $request->user();
-        if (!$admin || $admin->role->name !== 'jefe_transporte') {
+        if (! $admin || $admin->role->name !== 'jefe_transporte') {
             return response()->json(['message' => 'No autorizado.'], 403);
         }
 
@@ -125,20 +126,20 @@ class AdminDriverController extends Controller
                 'action' => "ACTUALIZÓ_CHOFER: {$driver->user->first_name} {$driver->user->last_name} (Licencia Tipo {$request->input('license_type')})",
                 'affected_table' => 'drivers',
                 'record_id' => $driver->id,
-                'ip_address' => $request->ip()
+                'ip_address' => $request->ip(),
             ]);
         });
 
         return response()->json([
             'message' => 'Chofer actualizado con éxito.',
-            'driver' => $driver->load(['user', 'licenses'])
+            'driver' => $driver->load(['user', 'licenses']),
         ]);
     }
 
     public function destroy(Request $request, $id)
     {
         $admin = $request->user();
-        if (!$admin || $admin->role->name !== 'jefe_transporte') {
+        if (! $admin || $admin->role->name !== 'jefe_transporte') {
             return response()->json(['message' => 'No autorizado.'], 403);
         }
 
@@ -156,13 +157,13 @@ class AdminDriverController extends Controller
                 'action' => "DESACTIVÓ_CHOFER: {$driver->user->first_name} {$driver->user->last_name} debido a viajes asignados",
                 'affected_table' => 'drivers',
                 'record_id' => $driver->id,
-                'ip_address' => $request->ip()
+                'ip_address' => $request->ip(),
             ]);
 
             return response()->json([
                 'message' => 'El chofer tiene viajes asociados en hojas de ruta. Se ha establecido como no disponible.',
                 'driver' => $driver->load(['user', 'licenses']),
-                'soft_deleted' => true
+                'soft_deleted' => true,
             ]);
         }
 
@@ -176,13 +177,13 @@ class AdminDriverController extends Controller
                 'action' => "ELIMINÓ_CHOFER_FISICO: {$driver->user->first_name} {$driver->user->last_name}",
                 'affected_table' => 'drivers',
                 'record_id' => $id,
-                'ip_address' => $request->ip()
+                'ip_address' => $request->ip(),
             ]);
         });
 
         return response()->json([
             'message' => 'Chofer eliminado físicamente con éxito.',
-            'soft_deleted' => false
+            'soft_deleted' => false,
         ]);
     }
 }

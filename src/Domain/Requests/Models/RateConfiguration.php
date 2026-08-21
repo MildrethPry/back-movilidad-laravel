@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 #[Fillable([
     'rate_key',
-    'rate_value'
+    'rate_value',
 ])]
 class RateConfiguration extends Model
 {

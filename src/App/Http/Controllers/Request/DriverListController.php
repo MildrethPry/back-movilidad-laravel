@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Domain\Auth\Models\Driver;
 use Carbon\Carbon;
+use Domain\Auth\Models\Driver;
+use Illuminate\Http\Request;
 
 class DriverListController extends Controller
 {
@@ -27,10 +27,10 @@ class DriverListController extends Controller
             $statusDetails = 'Disponible';
             $statusLabel = 'available';
 
-            if (!$driver->is_available) {
+            if (! $driver->is_available) {
                 $statusDetails = 'En viaje / No disponible';
                 $statusLabel = 'on_trip';
-            } elseif (!$activeLicense) {
+            } elseif (! $activeLicense) {
                 $latestLicense = $driver->licenses()->first();
                 if ($latestLicense) {
                     if ($latestLicense->current_points <= 0) {
@@ -52,7 +52,9 @@ class DriverListController extends Controller
             return [
                 'id' => $driver->id,
                 'user_id' => $driver->user_id,
-                'name' => $driver->user ? ($driver->user->first_name . ' ' . $driver->user->last_name) : 'Chofer sin nombre',
+                'name' => $driver->user ? ($driver->user->first_name.' '.$driver->user->last_name) : 'Chofer sin nombre',
+                'first_name' => $driver->user?->first_name ?? '',
+                'last_name' => $driver->user?->last_name ?? '',
                 'email' => $driver->user?->email,
                 'national_id' => $driver->user ? $driver->user->national_id : '',
                 'contract_type' => $driver->contract_type,

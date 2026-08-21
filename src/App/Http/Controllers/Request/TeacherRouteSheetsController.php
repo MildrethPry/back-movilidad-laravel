@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Domain\Requests\Models\RouteSheet;
+use Illuminate\Http\Request;
 
 class TeacherRouteSheetsController extends Controller
 {
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'No autenticado.'], 401);
         }
 
@@ -25,9 +25,9 @@ class TeacherRouteSheetsController extends Controller
             })
             ->where(function ($query) {
                 $query->whereDoesntHave('compensation')
-                      ->orWhereHas('compensation', function ($q) {
-                          $q->where('payment_status', 'pendiente_comprobante');
-                      });
+                    ->orWhereHas('compensation', function ($q) {
+                        $q->where('payment_status', 'pendiente_comprobante');
+                    });
             })
             ->get();
 

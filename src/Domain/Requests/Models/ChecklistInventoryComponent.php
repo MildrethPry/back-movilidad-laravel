@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 #[Fillable([
     'component_name',
-    'category'
+    'category',
 ])]
 class ChecklistInventoryComponent extends Model
 {

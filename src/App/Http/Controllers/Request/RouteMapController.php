@@ -70,7 +70,8 @@ class RouteMapController extends Controller
             return response()->json([]);
         }
 
-        $rows = $query->limit(50)->get()->map(function (RouteSheet $sheet) {
+        $rows = $query->paginate($this->resolvePerPage($request));
+        $rows->setCollection($rows->getCollection()->map(function (RouteSheet $sheet) {
             return [
                 'id' => $sheet->id,
                 'origin' => $sheet->request?->origin,
@@ -81,7 +82,7 @@ class RouteMapController extends Controller
                 'stops_count' => $sheet->stops->count(),
                 'has_geo' => $sheet->stops->whereNotNull('latitude')->count() > 0,
             ];
-        });
+        }));
 
         return response()->json($rows);
     }

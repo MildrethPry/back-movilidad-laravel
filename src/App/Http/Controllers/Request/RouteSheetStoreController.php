@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Domain\Requests\Actions\CreateRouteSheetAction;
+use Illuminate\Http\Request;
 
 class RouteSheetStoreController extends Controller
 {
@@ -39,7 +39,7 @@ class RouteSheetStoreController extends Controller
 
         return response()->json([
             'message' => 'Recursos asignados y hoja de ruta emitida exitosamente.',
-            'route_sheet' => $routeSheet
+            'route_sheet' => $routeSheet,
         ], 201);
     }
 }

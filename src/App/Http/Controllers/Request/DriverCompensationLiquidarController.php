@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Domain\Requests\Actions\CalculateDriverCompensationAction;
 use Domain\Requests\Models\DriverCompensation;
+use Illuminate\Http\Request;
 
 class DriverCompensationLiquidarController extends Controller
 {
@@ -37,13 +37,13 @@ class DriverCompensationLiquidarController extends Controller
                 'overtime_100_amount' => $calc['overtime_100_amount'],
                 'total_payout' => $calc['total_payout'],
                 'payment_receipt_url' => $receiptUrl,
-                'payment_status' => 'pendiente_comprobante'
+                'payment_status' => 'pendiente_comprobante',
             ]
         );
 
         return response()->json([
             'message' => 'Comprobante cargado. Liquidación registrada en estado pendiente de auditoría.',
-            'compensation' => $compensation
+            'compensation' => $compensation,
         ]);
     }
 }

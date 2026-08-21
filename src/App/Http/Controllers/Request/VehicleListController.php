@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Domain\Vehicles\Models\Vehicle;
+use Illuminate\Http\Request;
 
 class VehicleListController extends Controller
 {

@@ -2,11 +2,11 @@
 
 namespace Domain\Requests\Actions;
 
+use Domain\Requests\Models\FuelOrder;
+use Domain\Requests\Models\RouteSheet;
+use Domain\Requests\Models\ServiceStation;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Domain\Requests\Models\RouteSheet;
-use Domain\Requests\Models\FuelOrder;
-use Domain\Requests\Models\ServiceStation;
 
 class CreateFuelOrderAction
 {
@@ -21,9 +21,9 @@ class CreateFuelOrderAction
         $routeSheet = RouteSheet::with(['vehicle', 'request'])->findOrFail($routeSheetId);
         $station = ServiceStation::findOrFail($stationId);
 
-        if (!$station->active_agreement) {
+        if (! $station->active_agreement) {
             throw ValidationException::withMessages([
-                'station_id' => ['La estación de servicio seleccionada no tiene un convenio activo con la universidad.']
+                'station_id' => ['La estación de servicio seleccionada no tiene un convenio activo con la universidad.'],
             ]);
         }
 
@@ -31,7 +31,7 @@ class CreateFuelOrderAction
         $existingOrder = FuelOrder::where('route_sheet_id', $routeSheetId)->first();
         if ($existingOrder) {
             throw ValidationException::withMessages([
-                'route_sheet_id' => ["Ya existe un vale de combustible emitido para esta hoja de ruta ({$existingOrder->order_code})."]
+                'route_sheet_id' => ["Ya existe un vale de combustible emitido para esta hoja de ruta ({$existingOrder->order_code})."],
             ]);
         }
 
@@ -64,7 +64,7 @@ class CreateFuelOrderAction
         $authorizedGallons = round(($distance / $performance) + 2.0, 2);
 
         // 5. Generar código de vale único
-        $orderCode = 'ULEAM-' . strtoupper(Str::random(6));
+        $orderCode = 'ULEAM-'.strtoupper(Str::random(6));
 
         // 6. Registrar en base de datos
         return FuelOrder::create([
@@ -77,7 +77,7 @@ class CreateFuelOrderAction
             'actual_dispatched_gallons' => null,
             'total_amount_paid' => null,
             'order_status' => 'emitida',
-            'dispatch_date' => null
+            'dispatch_date' => null,
         ]);
     }
 }

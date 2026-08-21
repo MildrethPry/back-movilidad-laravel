@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Domain\Requests\Models\FuelOrder;
+use Illuminate\Http\Request;
 
 class FuelOrderShowController extends Controller
 {
@@ -14,12 +14,12 @@ class FuelOrderShowController extends Controller
             'routeSheet.vehicle',
             'routeSheet.driver.user',
             'routeSheet.request.requester',
-            'station'
+            'station',
         ])->where('order_code', $codigo_orden)->first();
 
-        if (!$fuelOrder) {
+        if (! $fuelOrder) {
             return response()->json([
-                'message' => 'El código de vale de combustible ingresado no existe.'
+                'message' => 'El código de vale de combustible ingresado no existe.',
             ], 404);
         }
 

@@ -2,17 +2,17 @@
 
 namespace Domain\Auth\Models;
 
+use Domain\Requests\Models\RouteSheet;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Domain\Requests\Models\RouteSheet;
 
 #[Fillable([
     'user_id',
     'contract_type',
-    'is_available'
+    'is_available',
 ])]
 class Driver extends Model
 {

@@ -2,9 +2,9 @@
 
 namespace Domain\Requests\Actions;
 
-use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 use Domain\Requests\Models\FuelOrder;
+use Illuminate\Validation\ValidationException;
 
 class DispatchFuelOrderAction
 {
@@ -18,23 +18,23 @@ class DispatchFuelOrderAction
         // 1. Obtener la orden de combustible
         $fuelOrder = FuelOrder::where('order_code', $orderCode)->first();
 
-        if (!$fuelOrder) {
+        if (! $fuelOrder) {
             throw ValidationException::withMessages([
-                'order_code' => ['El código de vale de combustible ingresado no existe en los registros.']
+                'order_code' => ['El código de vale de combustible ingresado no existe en los registros.'],
             ]);
         }
 
         // 2. Verificar estado de la orden
         if ($fuelOrder->order_status !== 'emitida') {
             throw ValidationException::withMessages([
-                'order_code' => ["Este vale de combustible no se encuentra activo. Estado actual: '{$fuelOrder->order_status}'."]
+                'order_code' => ["Este vale de combustible no se encuentra activo. Estado actual: '{$fuelOrder->order_status}'."],
             ]);
         }
 
         // 3. Validar cupo de galones reales frente a autorizados
         if ($actualDispatchedGallons > $fuelOrder->authorized_gallons) {
             throw ValidationException::withMessages([
-                'actual_dispatched_gallons' => ['El despacho excede el límite de galones autorizados para este vale institucional.']
+                'actual_dispatched_gallons' => ['El despacho excede el límite de galones autorizados para este vale institucional.'],
             ]);
         }
 
@@ -43,7 +43,7 @@ class DispatchFuelOrderAction
             'actual_dispatched_gallons' => $actualDispatchedGallons,
             'total_amount_paid' => $totalAmountPaid,
             'dispatch_date' => Carbon::now(),
-            'order_status' => 'despachada'
+            'order_status' => 'despachada',
         ]);
 
         return $fuelOrder;

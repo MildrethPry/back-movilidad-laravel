@@ -2,13 +2,13 @@
 
 namespace Domain\Workshop\Models;
 
+use Domain\Auth\Models\User;
+use Domain\Vehicles\Models\Vehicle;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Domain\Vehicles\Models\Vehicle;
-use Domain\Auth\Models\User;
 
 #[Fillable([
     'issue_log_id',
@@ -18,7 +18,7 @@ use Domain\Auth\Models\User;
     'maintenance_type',
     'work_details',
     'entry_date',
-    'exit_date'
+    'exit_date',
 ])]
 class WorkshopWorkOrder extends Model
 {
@@ -30,7 +30,7 @@ class WorkshopWorkOrder extends Model
 
     protected $casts = [
         'entry_date' => 'datetime',
-        'exit_date' => 'datetime'
+        'exit_date' => 'datetime',
     ];
 
     public function issueLog(): BelongsTo

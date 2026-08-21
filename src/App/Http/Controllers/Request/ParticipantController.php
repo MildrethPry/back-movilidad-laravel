@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
+use Domain\Auth\Models\Role;
 use Domain\Auth\Models\User;
 use Domain\Auth\Support\RoleCatalog;
 use Domain\Requests\Models\MobilizationRequest;
 use Domain\Requests\Models\PassengerManifest;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class ParticipantController extends Controller
@@ -142,19 +144,35 @@ class ParticipantController extends Controller
             return response()->json([]);
         }
 
+        $perPage = $this->resolvePerPage($request, 'app.student_search_per_page');
+
+        $studentRoleIds = Role::query()
+            ->whereIn('name', [RoleCatalog::ESTUDIANTE, 'pasajero'])
+            ->pluck('id')
+            ->all();
+
+        if ($studentRoleIds === []) {
+            return response()->json([]);
+        }
+
         $students = User::query()
-            ->where(function ($query) {
-                $query->whereHas('roles', fn ($r) => $r->whereIn('name', ['estudiante', 'pasajero']))
-                    ->orWhereHas('role', fn ($r) => $r->whereIn('name', ['estudiante', 'pasajero']));
+            ->where(function (Builder $query) use ($studentRoleIds) {
+                $query
+                    ->whereIn('role_id', $studentRoleIds)
+                    ->orWhereHas('roles', fn (Builder $roleQuery) => $roleQuery->whereIn('roles.id', $studentRoleIds));
             })
-            ->where(function ($query) use ($q) {
-                $query->where('first_name', 'like', "%{$q}%")
-                    ->orWhere('last_name', 'like', "%{$q}%")
-                    ->orWhere('national_id', 'like', "%{$q}%")
-                    ->orWhere('email', 'like', "%{$q}%");
+            ->where(function (Builder $query) use ($q) {
+                $query->whereLike('first_name', "{$q}%", caseSensitive: false)
+                    ->orWhereLike('last_name', "{$q}%", caseSensitive: false)
+                    ->orWhereLike('national_id', "{$q}%", caseSensitive: false)
+                    ->orWhereLike('email', "{$q}%", caseSensitive: false);
             })
-            ->limit(20)
-            ->get(['id', 'first_name', 'last_name', 'email', 'national_id', 'faculty_institution']);
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->simplePaginate(
+                $perPage,
+                ['id', 'first_name', 'last_name', 'email', 'national_id', 'faculty_institution']
+            );
 
         return response()->json($students);
     }

@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Domain\Vehicles\Models\Vehicle;
 use Domain\Auth\Models\SystemLog;
 use Domain\Requests\Models\RouteSheet;
+use Domain\Vehicles\Models\Vehicle;
+use Illuminate\Http\Request;
 
 class AdminVehicleController extends Controller
 {
     public function index(Request $request)
     {
         $admin = $request->user();
-        if (!$admin || $admin->role->name !== 'jefe_transporte') {
+        if (! $admin || $admin->role->name !== 'jefe_transporte') {
             return response()->json(['message' => 'No autorizado.'], 403);
         }
 
@@ -23,7 +23,7 @@ class AdminVehicleController extends Controller
     public function store(Request $request)
     {
         $admin = $request->user();
-        if (!$admin || $admin->role->name !== 'jefe_transporte') {
+        if (! $admin || $admin->role->name !== 'jefe_transporte') {
             return response()->json(['message' => 'No autorizado.'], 403);
         }
 
@@ -31,7 +31,7 @@ class AdminVehicleController extends Controller
             'plate' => 'required|string|max:10|unique:vehicles,plate',
             'brand' => 'required|string|max:50',
             'model' => 'required|string|max:50',
-            'year' => 'required|integer|min:1900|max:' . (date('Y') + 1),
+            'year' => 'required|integer|min:1900|max:'.(date('Y') + 1),
             'color' => 'required|string|max:30',
             'fuel_type' => 'required|string|in:diesel,extra,super',
             'current_mileage' => 'required|integer|min:0',
@@ -50,19 +50,19 @@ class AdminVehicleController extends Controller
             'action' => "REGISTRÓ_VEHÍCULO: {$vehicle->brand} {$vehicle->model} (Placa: {$vehicle->plate})",
             'affected_table' => 'vehicles',
             'record_id' => $vehicle->id,
-            'ip_address' => $request->ip()
+            'ip_address' => $request->ip(),
         ]);
 
         return response()->json([
             'message' => 'Vehículo registrado con éxito.',
-            'vehicle' => $vehicle
+            'vehicle' => $vehicle,
         ], 210);
     }
 
     public function update(Request $request, $id)
     {
         $admin = $request->user();
-        if (!$admin || $admin->role->name !== 'jefe_transporte') {
+        if (! $admin || $admin->role->name !== 'jefe_transporte') {
             return response()->json(['message' => 'No autorizado.'], 403);
         }
 
@@ -72,7 +72,7 @@ class AdminVehicleController extends Controller
             'plate' => "required|string|max:10|unique:vehicles,plate,{$id}",
             'brand' => 'required|string|max:50',
             'model' => 'required|string|max:50',
-            'year' => 'required|integer|min:1900|max:' . (date('Y') + 1),
+            'year' => 'required|integer|min:1900|max:'.(date('Y') + 1),
             'color' => 'required|string|max:30',
             'fuel_type' => 'required|string|in:diesel,extra,super',
             'current_mileage' => "required|integer|min:{$vehicle->current_mileage}",
@@ -90,19 +90,19 @@ class AdminVehicleController extends Controller
             'action' => "ACTUALIZÓ_VEHÍCULO: {$vehicle->brand} {$vehicle->model} (Placa: {$vehicle->plate})",
             'affected_table' => 'vehicles',
             'record_id' => $vehicle->id,
-            'ip_address' => $request->ip()
+            'ip_address' => $request->ip(),
         ]);
 
         return response()->json([
             'message' => 'Vehículo actualizado con éxito.',
-            'vehicle' => $vehicle
+            'vehicle' => $vehicle,
         ]);
     }
 
     public function destroy(Request $request, $id)
     {
         $admin = $request->user();
-        if (!$admin || $admin->role->name !== 'jefe_transporte') {
+        if (! $admin || $admin->role->name !== 'jefe_transporte') {
             return response()->json(['message' => 'No autorizado.'], 403);
         }
 
@@ -120,13 +120,13 @@ class AdminVehicleController extends Controller
                 'action' => "DESACTIVÓ_VEHÍCULO: {$vehicle->brand} {$vehicle->model} (Placa: {$vehicle->plate}) debido a comisiones asociadas",
                 'affected_table' => 'vehicles',
                 'record_id' => $vehicle->id,
-                'ip_address' => $request->ip()
+                'ip_address' => $request->ip(),
             ]);
 
             return response()->json([
                 'message' => 'El vehículo tiene viajes asociados. Se ha establecido como inactivo.',
                 'vehicle' => $vehicle,
-                'soft_deleted' => true
+                'soft_deleted' => true,
             ]);
         }
 
@@ -138,12 +138,12 @@ class AdminVehicleController extends Controller
             'action' => "ELIMINÓ_VEHÍCULO_FISICO: {$vehicle->brand} {$vehicle->model} (Placa: {$vehicle->plate})",
             'affected_table' => 'vehicles',
             'record_id' => $id,
-            'ip_address' => $request->ip()
+            'ip_address' => $request->ip(),
         ]);
 
         return response()->json([
             'message' => 'Vehículo eliminado físicamente de la flota con éxito.',
-            'soft_deleted' => false
+            'soft_deleted' => false,
         ]);
     }
 }

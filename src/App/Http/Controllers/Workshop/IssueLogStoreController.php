@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Workshop;
 
 use App\Http\Controllers\Controller;
-use Domain\Auth\Models\Driver;
 use Domain\Vehicles\Models\Vehicle;
 use Domain\Workshop\Models\IssueLog;
 use Illuminate\Http\Request;

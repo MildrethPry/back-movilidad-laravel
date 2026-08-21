@@ -3,32 +3,32 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Domain\Requests\Models\ServiceStation;
 use Domain\Auth\Models\SystemLog;
+use Domain\Requests\Models\ServiceStation;
+use Illuminate\Http\Request;
 
 class ServiceStationToggleController extends Controller
 {
     public function __invoke(Request $request, $id)
     {
         $user = $request->user();
-        if (!$user || $user->role->name !== 'jefe_transporte') {
+        if (! $user || $user->role->name !== 'jefe_transporte') {
             return response()->json(['message' => 'No autorizado.'], 403);
         }
 
         $station = ServiceStation::findOrFail($id);
         $oldStatus = $station->active_agreement;
-        $newStatus = !$oldStatus;
+        $newStatus = ! $oldStatus;
 
         $station->update([
-            'active_agreement' => $newStatus
+            'active_agreement' => $newStatus,
         ]);
 
         // Registrar en system_logs
-        $prefix = $newStatus ? "ACTIVÓ_CONVENIO: " : "DESACTIVÓ_CONVENIO: ";
+        $prefix = $newStatus ? 'ACTIVÓ_CONVENIO: ' : 'DESACTIVÓ_CONVENIO: ';
         $actionMsg = "{$prefix}{$station->commercial_name} (RUC: {$station->ruc})";
         if (strlen($actionMsg) > 100) {
-            $actionMsg = substr($actionMsg, 0, 97) . '...';
+            $actionMsg = substr($actionMsg, 0, 97).'...';
         }
 
         SystemLog::create([
@@ -36,12 +36,12 @@ class ServiceStationToggleController extends Controller
             'action' => $actionMsg,
             'affected_table' => 'service_stations',
             'record_id' => $station->id,
-            'ip_address' => $request->ip()
+            'ip_address' => $request->ip(),
         ]);
 
         return response()->json([
-            'message' => "Convenio de la estación de servicio actualizado con éxito.",
-            'station' => $station
+            'message' => 'Convenio de la estación de servicio actualizado con éxito.',
+            'station' => $station,
         ]);
     }
 }

@@ -2,24 +2,26 @@
 
 namespace Database\Seeders;
 
-use Domain\Auth\Models\Role;
-use Domain\Auth\Models\User;
+use Carbon\Carbon;
+use Domain\Auth\Models\DailyAttendance;
 use Domain\Auth\Models\Driver;
 use Domain\Auth\Models\DriverLicense;
-use Domain\Auth\Models\DailyAttendance;
-use Domain\Vehicles\Models\Vehicle;
+use Domain\Auth\Models\Role;
+use Domain\Auth\Models\SystemLog;
+use Domain\Auth\Models\User;
+use Domain\Requests\Models\ChecklistInventoryComponent;
+use Domain\Requests\Models\DeliveryReceptionAct;
+use Domain\Requests\Models\FuelOrder;
 use Domain\Requests\Models\MobilizationRequest;
+use Domain\Requests\Models\PassengerManifest;
+use Domain\Requests\Models\RateConfiguration;
 use Domain\Requests\Models\RouteSheet;
 use Domain\Requests\Models\ServiceStation;
-use Domain\Requests\Models\FuelOrder;
-use Domain\Requests\Models\PassengerManifest;
-use Domain\Requests\Models\DeliveryReceptionAct;
-use Domain\Requests\Models\RateConfiguration;
-use Domain\Requests\Models\ChecklistInventoryComponent;
+use Domain\Vehicles\Models\Vehicle;
 use Domain\Workshop\Models\SupplyInventory;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -146,7 +148,7 @@ class DatabaseSeeder extends Seeder
             [
                 'license_type' => 'E',
                 'current_points' => 30,
-                'expiration_date' => \Carbon\Carbon::now()->addYears(5)->toDateString(),
+                'expiration_date' => Carbon::now()->addYears(5)->toDateString(),
             ]
         );
 
@@ -215,7 +217,7 @@ class DatabaseSeeder extends Seeder
             [
                 'license_type' => 'C',
                 'current_points' => 15,
-                'expiration_date' => \Carbon\Carbon::now()->subDays(5)->toDateString(), // Expirada
+                'expiration_date' => Carbon::now()->subDays(5)->toDateString(), // Expirada
             ]
         );
 
@@ -326,16 +328,16 @@ class DatabaseSeeder extends Seeder
                 ['supply_name' => $item['supply_name']],
                 [
                     'current_stock' => $item['current_stock'],
-                    'measurement_unit' => $item['measurement_unit']
+                    'measurement_unit' => $item['measurement_unit'],
                 ]
             );
         }
 
         // Sembrar solicitud y hoja de ruta pendiente de salida
-        $requester = User::where('email', 'solicitante@test.com')->first();
-        $driver = Driver::first();
+        $requester = $docente;
+        $driver = $driver1;
         $vehicle = Vehicle::where('plate', 'MBA-1234')->first();
-        $jefe = User::where('email', 'jefe@test.com')->first();
+        $jefe = $secretaria;
 
         if ($requester && $driver && $vehicle && $jefe) {
             $req = MobilizationRequest::firstOrCreate(
@@ -344,12 +346,12 @@ class DatabaseSeeder extends Seeder
                     'requester_id' => $requester->id,
                     'mobilization_type' => 'externa',
                     'origin' => 'MANTA',
-                    'departure_date' => \Carbon\Carbon::now()->addDay()->toDateString(),
-                    'return_date' => \Carbon\Carbon::now()->addDays(4)->toDateString(),
+                    'departure_date' => Carbon::now()->addDay()->toDateString(),
+                    'return_date' => Carbon::now()->addDays(4)->toDateString(),
                     'estimated_days' => 3,
                     'projected_cost' => 240.00,
                     'status' => 'aprobada',
-                    'rectorate_approver_id' => User::where('email', 'rector@test.com')->first()->id ?? null
+                    'rectorate_approver_id' => $vicerrector->id,
                 ]
             );
 
@@ -362,7 +364,7 @@ class DatabaseSeeder extends Seeder
                     'transport_chief_id' => $jefe->id,
                     'initial_mileage' => null,
                     'final_mileage' => null,
-                    'trip_status' => 'programado'
+                    'trip_status' => 'programado',
                 ]
             );
 
@@ -372,14 +374,14 @@ class DatabaseSeeder extends Seeder
                     'commercial_name' => 'Gasolinera Primax Tarqui',
                     'ruc' => '1301234567001',
                     'address' => 'Av. 108 y Calle 101, Manta',
-                    'active_agreement' => true
+                    'active_agreement' => true,
                 ],
                 [
                     'commercial_name' => 'Estación de Servicio Petrolecuador Manta',
                     'ruc' => '1309876543001',
                     'address' => 'Vía San Mateo km 1, Manta',
-                    'active_agreement' => true
-                ]
+                    'active_agreement' => true,
+                ],
             ];
 
             $stationModels = [];
@@ -389,7 +391,7 @@ class DatabaseSeeder extends Seeder
                     [
                         'commercial_name' => $item['commercial_name'],
                         'address' => $item['address'],
-                        'active_agreement' => $item['active_agreement']
+                        'active_agreement' => $item['active_agreement'],
                     ]
                 );
             }
@@ -407,7 +409,7 @@ class DatabaseSeeder extends Seeder
                         'actual_dispatched_gallons' => null,
                         'total_amount_paid' => null,
                         'order_status' => 'emitida',
-                        'dispatch_date' => null
+                        'dispatch_date' => null,
                     ]
                 );
             }
@@ -438,9 +440,9 @@ class DatabaseSeeder extends Seeder
             );
 
             // Sembrar asistencias del conductor (Luis Alberto) para cálculo de horas extras
-            $today = \Carbon\Carbon::today();
-            $yesterday = \Carbon\Carbon::yesterday();
-            $twoDaysAgo = \Carbon\Carbon::today()->subDays(2);
+            $today = Carbon::today();
+            $yesterday = Carbon::yesterday();
+            $twoDaysAgo = Carbon::today()->subDays(2);
 
             $datesToSeed = [$twoDaysAgo, $yesterday, $today];
             foreach ($datesToSeed as $d) {
@@ -449,7 +451,7 @@ class DatabaseSeeder extends Seeder
                     [
                         'check_in_time' => '08:00:00',
                         'check_out_time' => '17:00:00',
-                        'notes' => 'Asistencia regular local.'
+                        'notes' => 'Asistencia regular local.',
                     ]
                 );
             }
@@ -466,7 +468,7 @@ class DatabaseSeeder extends Seeder
                     'estimated_days' => 3,
                     'projected_cost' => 160.00,
                     'status' => 'aprobada',
-                    'rectorate_approver_id' => User::where('email', 'rector@test.com')->first()->id ?? null
+                    'rectorate_approver_id' => $vicerrector->id,
                 ]
             );
 
@@ -478,7 +480,7 @@ class DatabaseSeeder extends Seeder
                     'transport_chief_id' => $jefe->id,
                     'initial_mileage' => 45000,
                     'final_mileage' => 45400,
-                    'trip_status' => 'pendiente_feedback'
+                    'trip_status' => 'pendiente_feedback',
                 ]
             );
 
@@ -498,7 +500,7 @@ class DatabaseSeeder extends Seeder
                     'fuel_level' => 'full',
                     'checkpoint_mileage' => 45000,
                     'general_observations' => 'Salida autorizada.',
-                    'created_at' => $salidaDate
+                    'created_at' => $salidaDate,
                 ]
             );
 
@@ -511,63 +513,63 @@ class DatabaseSeeder extends Seeder
                     'fuel_level' => '1/2',
                     'checkpoint_mileage' => 45400,
                     'general_observations' => 'Llegada registrada.',
-                    'created_at' => $llegadaDate
+                    'created_at' => $llegadaDate,
                 ]
             );
 
             // Sembrar logs de auditoría de seguridad
-            \Domain\Auth\Models\SystemLog::firstOrCreate(
+            SystemLog::firstOrCreate(
                 ['action' => 'APROBÓ_SOLICITUD: Manta -> QUITO (ID #1)'],
                 [
-                    'user_id' => User::where('email', 'rector@test.com')->first()->id ?? $jefe->id,
+                    'user_id' => $vicerrector->id,
                     'affected_table' => 'mobilization_requests',
                     'record_id' => $req->id,
                     'ip_address' => '192.168.10.15',
-                    'created_at' => \Carbon\Carbon::now()->subDays(3)
+                    'created_at' => Carbon::now()->subDays(3),
                 ]
             );
 
-            \Domain\Auth\Models\SystemLog::firstOrCreate(
+            SystemLog::firstOrCreate(
                 ['action' => 'EMITIÓ_HOJA_RUTA: Vehículo MBA-1234 (ID #1)'],
                 [
                     'user_id' => $jefe->id,
                     'affected_table' => 'route_sheets',
                     'record_id' => $sheet1->id,
                     'ip_address' => '192.168.10.50',
-                    'created_at' => \Carbon\Carbon::now()->subDays(2)
+                    'created_at' => Carbon::now()->subDays(2),
                 ]
             );
 
-            \Domain\Auth\Models\SystemLog::firstOrCreate(
+            SystemLog::firstOrCreate(
                 ['action' => 'EMITIÓ_VALE_COMBUSTIBLE: ULEAM-FUEL12 para Primax Tarqui'],
                 [
                     'user_id' => $jefe->id,
                     'affected_table' => 'fuel_orders',
                     'record_id' => 1,
                     'ip_address' => '192.168.10.50',
-                    'created_at' => \Carbon\Carbon::now()->subDays(2)
+                    'created_at' => Carbon::now()->subDays(2),
                 ]
             );
 
-            \Domain\Auth\Models\SystemLog::firstOrCreate(
+            SystemLog::firstOrCreate(
                 ['action' => 'REGISTRÓ_INSPECCION_SALIDA: Kilometraje 45000 (ID #2)'],
                 [
                     'user_id' => $jefe->id,
                     'affected_table' => 'delivery_reception_acts',
                     'record_id' => 1,
                     'ip_address' => '192.168.10.22',
-                    'created_at' => $salidaDate
+                    'created_at' => $salidaDate,
                 ]
             );
 
-            \Domain\Auth\Models\SystemLog::firstOrCreate(
+            SystemLog::firstOrCreate(
                 ['action' => 'REGISTRÓ_INSPECCION_LLEGADA: Kilometraje 45400 (ID #2)'],
                 [
                     'user_id' => $jefe->id,
                     'affected_table' => 'delivery_reception_acts',
                     'record_id' => 2,
                     'ip_address' => '192.168.10.22',
-                    'created_at' => $llegadaDate
+                    'created_at' => $llegadaDate,
                 ]
             );
         }

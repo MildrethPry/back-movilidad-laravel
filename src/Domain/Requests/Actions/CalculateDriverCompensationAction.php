@@ -3,10 +3,10 @@
 namespace Domain\Requests\Actions;
 
 use Carbon\Carbon;
-use Domain\Requests\Models\RouteSheet;
+use Domain\Auth\Models\DailyAttendance;
 use Domain\Requests\Models\DeliveryReceptionAct;
 use Domain\Requests\Models\RateConfiguration;
-use Domain\Auth\Models\DailyAttendance;
+use Domain\Requests\Models\RouteSheet;
 
 class CalculateDriverCompensationAction
 {
@@ -115,7 +115,7 @@ class CalculateDriverCompensationAction
             'overtime_100_amount' => round($overtime100Amount, 2),
             'total_payout' => round($totalPayout, 2),
             'departure_real' => $departureTime->toDateTimeString(),
-            'arrival_real' => $arrivalTime->toDateTimeString()
+            'arrival_real' => $arrivalTime->toDateTimeString(),
         ];
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Request;
 use App\Http\Controllers\Controller;
 use Domain\Auth\Models\Driver;
 use Domain\Auth\Models\DriverLicense;
+use Domain\Auth\Models\Role;
 use Domain\Auth\Models\User;
 use Domain\Auth\Support\RoleCatalog;
 use Domain\Vehicles\Models\Vehicle;
@@ -33,7 +34,7 @@ class FleetManageController extends Controller
         ]);
 
         $driver = DB::transaction(function () use ($data) {
-            $role = \Domain\Auth\Models\Role::where('name', RoleCatalog::CONDUCTOR)->first();
+            $role = Role::where('name', RoleCatalog::CONDUCTOR)->first();
             $user = User::create([
                 'national_id' => $data['national_id'],
                 'first_name' => $data['first_name'],

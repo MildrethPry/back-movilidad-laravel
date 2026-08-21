@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Domain\Auth\Models\SystemLog;
+use Illuminate\Http\Request;
 
 class SystemLogListController extends Controller
 {
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        if (!$user || $user->role->name !== 'jefe_transporte') {
+        if (! $user || $user->role->name !== 'jefe_transporte') {
             return response()->json(['message' => 'No autorizado.'], 403);
         }
 
@@ -24,8 +24,8 @@ class SystemLogListController extends Controller
         if ($search) {
             $query->whereHas('user', function ($q) use ($search) {
                 $q->where('first_name', 'like', "%{$search}%")
-                  ->orWhere('last_name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -33,7 +33,7 @@ class SystemLogListController extends Controller
             $query->where('action', 'like', "%{$action}%");
         }
 
-        $logs = $query->paginate(10);
+        $logs = $query->paginate($this->resolvePerPage($request));
 
         return response()->json($logs);
     }

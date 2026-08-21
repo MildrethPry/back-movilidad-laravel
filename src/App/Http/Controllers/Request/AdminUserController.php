@@ -3,20 +3,20 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Domain\Auth\Models\User;
 use Domain\Auth\Models\SystemLog;
+use Domain\Auth\Models\User;
+use Domain\Requests\Models\DeliveryReceptionAct;
 use Domain\Requests\Models\MobilizationRequest;
 use Domain\Requests\Models\RouteSheet;
-use Domain\Requests\Models\DeliveryReceptionAct;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class AdminUserController extends Controller
 {
     public function index(Request $request)
     {
         $admin = $request->user();
-        if (!$admin || $admin->role->name !== 'jefe_transporte') {
+        if (! $admin || $admin->role->name !== 'jefe_transporte') {
             return response()->json(['message' => 'No autorizado.'], 403);
         }
 
@@ -28,9 +28,9 @@ class AdminUserController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('national_id', 'like', "%{$search}%")
-                  ->orWhere('last_name', 'like', "%{$search}%")
-                  ->orWhere('first_name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('first_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -42,13 +42,13 @@ class AdminUserController extends Controller
             return response()->json($query->get());
         }
 
-        return response()->json($query->paginate(10));
+        return response()->json($query->paginate($this->resolvePerPage($request)));
     }
 
     public function store(Request $request)
     {
         $admin = $request->user();
-        if (!$admin || $admin->role->name !== 'jefe_transporte') {
+        if (! $admin || $admin->role->name !== 'jefe_transporte') {
             return response()->json(['message' => 'No autorizado.'], 403);
         }
 
@@ -83,19 +83,19 @@ class AdminUserController extends Controller
             'action' => "CREÓ_USUARIO: {$user->first_name} {$user->last_name} ({$user->email})",
             'affected_table' => 'users',
             'record_id' => $user->id,
-            'ip_address' => $request->ip()
+            'ip_address' => $request->ip(),
         ]);
 
         return response()->json([
             'message' => 'Usuario creado con éxito.',
-            'user' => $user->load('role')
+            'user' => $user->load('role'),
         ], 210);
     }
 
     public function update(Request $request, $id)
     {
         $admin = $request->user();
-        if (!$admin || $admin->role->name !== 'jefe_transporte') {
+        if (! $admin || $admin->role->name !== 'jefe_transporte') {
             return response()->json(['message' => 'No autorizado.'], 403);
         }
 
@@ -136,19 +136,19 @@ class AdminUserController extends Controller
             'action' => "ACTUALIZÓ_USUARIO: {$user->first_name} {$user->last_name} ({$user->email})",
             'affected_table' => 'users',
             'record_id' => $user->id,
-            'ip_address' => $request->ip()
+            'ip_address' => $request->ip(),
         ]);
 
         return response()->json([
             'message' => 'Usuario actualizado con éxito.',
-            'user' => $user->load('role')
+            'user' => $user->load('role'),
         ]);
     }
 
     public function destroy(Request $request, $id)
     {
         $admin = $request->user();
-        if (!$admin || $admin->role->name !== 'jefe_transporte') {
+        if (! $admin || $admin->role->name !== 'jefe_transporte') {
             return response()->json(['message' => 'No autorizado.'], 403);
         }
 
@@ -174,13 +174,13 @@ class AdminUserController extends Controller
                 'action' => "DESACTIVÓ_USUARIO: {$user->first_name} {$user->last_name} (Desactivado por tener historial de comisiones/firmas)",
                 'affected_table' => 'users',
                 'record_id' => $user->id,
-                'ip_address' => $request->ip()
+                'ip_address' => $request->ip(),
             ]);
 
             return response()->json([
                 'message' => 'El usuario tiene solicitudes o viajes asociados. Se ha desactivado en lugar de eliminar.',
                 'user' => $user->load('role'),
-                'soft_deleted' => true
+                'soft_deleted' => true,
             ]);
         }
 
@@ -192,12 +192,12 @@ class AdminUserController extends Controller
             'action' => "ELIMINÓ_USUARIO_FISICO: {$user->first_name} {$user->last_name} ({$user->email})",
             'affected_table' => 'users',
             'record_id' => $id,
-            'ip_address' => $request->ip()
+            'ip_address' => $request->ip(),
         ]);
 
         return response()->json([
             'message' => 'Usuario eliminado físicamente con éxito.',
-            'soft_deleted' => false
+            'soft_deleted' => false,
         ]);
     }
 }

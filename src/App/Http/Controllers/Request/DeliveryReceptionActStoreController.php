@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Request;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Domain\Requests\Actions\CreateDeliveryReceptionActAction;
+use Illuminate\Http\Request;
 
 class DeliveryReceptionActStoreController extends Controller
 {
@@ -15,7 +15,7 @@ class DeliveryReceptionActStoreController extends Controller
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'No autenticado.'], 401);
         }
 
@@ -46,7 +46,7 @@ class DeliveryReceptionActStoreController extends Controller
 
         return response()->json([
             'message' => 'Inspección en patio registrada de forma exitosa.',
-            'act' => $act
+            'act' => $act,
         ], 201);
     }
 }

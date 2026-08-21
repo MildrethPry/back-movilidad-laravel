@@ -5,11 +5,17 @@ namespace Domain\Auth\Support;
 final class RoleCatalog
 {
     public const SECRETARIA = 'secretaria';
+
     public const CONDUCTOR = 'conductor';
+
     public const MECANICO = 'mecanico';
+
     public const DOCENTE = 'docente';
+
     public const RESPONSABLE_FACULTAD = 'responsable_facultad';
+
     public const VICERRECTOR = 'vicerrector';
+
     public const ESTUDIANTE = 'estudiante';
 
     /** @var array<string, string> */

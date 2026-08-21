@@ -2,14 +2,14 @@
 
 namespace Domain\Requests\Actions;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
-use Domain\Requests\Models\RouteSheet;
-use Domain\Requests\Models\DeliveryReceptionAct;
 use Domain\Requests\Models\ActChecklistDetail;
 use Domain\Requests\Models\ChecklistInventoryComponent;
+use Domain\Requests\Models\DeliveryReceptionAct;
+use Domain\Requests\Models\RouteSheet;
 use Domain\Workshop\Models\IssueLog;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class CreateDeliveryReceptionActAction
 {
@@ -41,13 +41,13 @@ class CreateDeliveryReceptionActAction
             // Validar kilometraje coherente
             if ($registrationType === 'salida' && $checkpointMileage < $vehicle->current_mileage) {
                 throw ValidationException::withMessages([
-                    'checkpoint_mileage' => ["El kilometraje de salida ({$checkpointMileage}) no puede ser menor al kilometraje actual del vehículo ({$vehicle->current_mileage})."]
+                    'checkpoint_mileage' => ["El kilometraje de salida ({$checkpointMileage}) no puede ser menor al kilometraje actual del vehículo ({$vehicle->current_mileage})."],
                 ]);
             }
 
             if ($registrationType === 'llegada' && $routeSheet->initial_mileage && $checkpointMileage < $routeSheet->initial_mileage) {
                 throw ValidationException::withMessages([
-                    'checkpoint_mileage' => ["El kilometraje de llegada ({$checkpointMileage}) no puede ser menor al kilometraje inicial registrado ({$routeSheet->initial_mileage})."]
+                    'checkpoint_mileage' => ["El kilometraje de llegada ({$checkpointMileage}) no puede ser menor al kilometraje inicial registrado ({$routeSheet->initial_mileage})."],
                 ]);
             }
 
@@ -58,7 +58,7 @@ class CreateDeliveryReceptionActAction
                 'registration_type' => $registrationType,
                 'fuel_level' => $fuelLevel,
                 'checkpoint_mileage' => $checkpointMileage,
-                'general_observations' => null
+                'general_observations' => null,
             ]);
 
             // 3. Registrar detalles y verificar estado "MALO"
@@ -69,7 +69,7 @@ class CreateDeliveryReceptionActAction
                 ActChecklistDetail::create([
                     'act_id' => $act->id,
                     'component_id' => $item['id'],
-                    'physical_condition' => $item['physical_condition']
+                    'physical_condition' => $item['physical_condition'],
                 ]);
 
                 if ($item['physical_condition'] === 'MALO') {
@@ -85,7 +85,7 @@ class CreateDeliveryReceptionActAction
                 // Cambia el estado del vehículo a 'en_taller'
                 $vehicle->update([
                     'operational_status' => 'en_taller',
-                    'current_mileage' => $checkpointMileage // actualiza el kilometraje reportado
+                    'current_mileage' => $checkpointMileage, // actualiza el kilometraje reportado
                 ]);
 
                 // Inserta fila en libro_novedades (issue_logs)
@@ -94,14 +94,14 @@ class CreateDeliveryReceptionActAction
                     'route_sheet_id' => $routeSheet->id,
                     'reporting_driver_id' => $routeSheet->driver->user_id,
                     'breakdown_date' => Carbon::today(),
-                    'description' => "Novedad en inspección de {$registrationType}. Componentes defectuosos: " . implode(', ', $failedComponents),
-                    'status' => 'pendiente'
+                    'description' => "Novedad en inspección de {$registrationType}. Componentes defectuosos: ".implode(', ', $failedComponents),
+                    'status' => 'pendiente',
                 ]);
 
                 // Bloquea el viaje manteniendo estado 'programado'
                 if ($registrationType === 'salida') {
                     $routeSheet->update([
-                        'trip_status' => 'programado'
+                        'trip_status' => 'programado',
                     ]);
                 }
             } else {
@@ -109,28 +109,28 @@ class CreateDeliveryReceptionActAction
                 if ($registrationType === 'salida') {
                     $routeSheet->update([
                         'initial_mileage' => $checkpointMileage,
-                        'trip_status' => 'en_ruta'
+                        'trip_status' => 'en_ruta',
                     ]);
 
                     $vehicle->update([
                         'operational_status' => 'en_viaje',
-                        'current_mileage' => $checkpointMileage
+                        'current_mileage' => $checkpointMileage,
                     ]);
                 } else {
                     // llegada sin novedades
                     $routeSheet->update([
                         'final_mileage' => $checkpointMileage,
-                        'trip_status' => 'finalizado'
+                        'trip_status' => 'finalizado',
                     ]);
 
                     $vehicle->update([
                         'operational_status' => 'disponible',
-                        'current_mileage' => $checkpointMileage
+                        'current_mileage' => $checkpointMileage,
                     ]);
 
                     // Liberar chofer
                     $routeSheet->driver->update([
-                        'is_available' => true
+                        'is_available' => true,
                     ]);
                 }
             }
