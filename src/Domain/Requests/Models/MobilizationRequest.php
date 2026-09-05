@@ -15,6 +15,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'mobilization_type',
     'origin',
     'destination',
+    'destination_address',
+    'destination_latitude',
+    'destination_longitude',
     'travel_reason',
     'departure_date',
     'departure_time',
@@ -43,6 +46,8 @@ class MobilizationRequest extends Model
             'departure_time' => 'string',
             'return_date' => 'date',
             'return_time' => 'string',
+            'destination_latitude' => 'float',
+            'destination_longitude' => 'float',
             'projected_cost' => 'decimal:2',
             'confirmation_deadline' => 'datetime',
         ];

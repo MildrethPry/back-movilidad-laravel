@@ -94,6 +94,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/drivers/{id}', [FleetManageController::class, 'updateDriver']);
         Route::post('/vehicles', [FleetManageController::class, 'storeVehicle']);
         Route::patch('/vehicles/{id}', [FleetManageController::class, 'updateVehicle']);
+        Route::patch('/vehicles/{id}/documentos', [FleetManageController::class, 'updateVehicleDocuments']);
         Route::post('/estaciones-servicio', [ServiceStationManageController::class, 'store']);
         Route::patch('/estaciones-servicio/{id}', [ServiceStationManageController::class, 'update']);
         Route::get('/vehicles', VehicleListController::class);

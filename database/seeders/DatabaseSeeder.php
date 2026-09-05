@@ -18,6 +18,7 @@ use Domain\Requests\Models\RateConfiguration;
 use Domain\Requests\Models\RouteSheet;
 use Domain\Requests\Models\ServiceStation;
 use Domain\Vehicles\Models\Vehicle;
+use Domain\Vehicles\Models\VehicleLegalDocument;
 use Domain\Workshop\Models\SupplyInventory;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -266,6 +267,37 @@ class DatabaseSeeder extends Seeder
                 'operational_status' => 'en_taller', // No disponible en patio
             ]
         );
+
+        // Documentación de ejemplo para consultar la vigencia de la flota.
+        $documentDates = [
+            'MBA-1234' => [
+                'permiso_circulacion' => [Carbon::now()->subYear(), Carbon::now()->addYear()],
+                'revision_tecnica' => [Carbon::now()->subMonths(6), Carbon::now()->addMonths(6)],
+                'matricula' => [Carbon::now()->subMonths(4), Carbon::now()->addMonths(8)],
+            ],
+            'MBA-5678' => [
+                'permiso_circulacion' => [Carbon::now()->subYear(), Carbon::now()->subDays(3)],
+                'revision_tecnica' => [Carbon::now()->subYear(), Carbon::now()->addDays(15)],
+                'matricula' => [Carbon::now()->subMonths(5), Carbon::now()->addMonths(7)],
+            ],
+            'MBA-9012' => [
+                'permiso_circulacion' => [Carbon::now()->subYear(), Carbon::now()->addMonths(4)],
+                'revision_tecnica' => [Carbon::now()->subYear(), Carbon::now()->subDays(10)],
+            ],
+        ];
+
+        foreach ($documentDates as $plate => $documents) {
+            $vehicle = Vehicle::where('plate', $plate)->first();
+            foreach ($documents as $type => [$issueDate, $expirationDate]) {
+                VehicleLegalDocument::updateOrCreate(
+                    ['vehicle_id' => $vehicle?->id, 'document_type' => $type],
+                    [
+                        'issue_date' => $issueDate->toDateString(),
+                        'expiration_date' => $expirationDate->toDateString(),
+                    ]
+                );
+            }
+        }
 
         // Sembrar tarifas
         RateConfiguration::firstOrCreate(
