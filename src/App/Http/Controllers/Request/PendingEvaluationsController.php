@@ -17,8 +17,14 @@ class PendingEvaluationsController extends Controller
 
         $pending = RouteSheet::with(['vehicle', 'driver.user', 'request'])
             ->where('trip_status', 'pendiente_feedback')
-            ->whereHas('request.passengers', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
+            ->where(function ($query) use ($user) {
+                $query
+                    ->whereHas('request', function ($requestQuery) use ($user) {
+                        $requestQuery->where('requester_id', $user->id);
+                    })
+                    ->orWhereHas('request.passengers', function ($passengerQuery) use ($user) {
+                        $passengerQuery->where('user_id', $user->id);
+                    });
             })
             ->whereDoesntHave('evaluations', function ($query) use ($user) {
                 $query->where('passenger_id', $user->id);
