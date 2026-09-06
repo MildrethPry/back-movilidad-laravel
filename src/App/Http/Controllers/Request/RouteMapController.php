@@ -28,6 +28,9 @@ class RouteMapController extends Controller
             'driver_response' => $sheet->driver_response,
             'origin' => $sheet->request?->origin,
             'destination' => $sheet->request?->destination,
+            'destination_address' => $sheet->request?->destination_address,
+            'destination_latitude' => $sheet->request?->destination_latitude,
+            'destination_longitude' => $sheet->request?->destination_longitude,
             'departure_date' => optional($sheet->request?->departure_date)?->toDateString(),
             'return_date' => optional($sheet->request?->return_date)?->toDateString(),
             'vehicle' => $sheet->vehicle,
@@ -80,7 +83,9 @@ class RouteMapController extends Controller
                 'driver' => trim(($sheet->driver?->user?->first_name.' '.$sheet->driver?->user?->last_name) ?: ''),
                 'vehicle' => $sheet->vehicle?->plate,
                 'stops_count' => $sheet->stops->count(),
-                'has_geo' => $sheet->stops->whereNotNull('latitude')->count() > 0,
+                'has_geo' => $sheet->stops->whereNotNull('latitude')->count() > 0
+                    || ($sheet->request?->destination_latitude !== null
+                        && $sheet->request?->destination_longitude !== null),
             ];
         }));
 

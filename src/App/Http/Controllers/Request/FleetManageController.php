@@ -9,6 +9,7 @@ use Domain\Auth\Models\Role;
 use Domain\Auth\Models\User;
 use Domain\Auth\Support\RoleCatalog;
 use Domain\Vehicles\Models\Vehicle;
+use Domain\Vehicles\Models\VehicleLegalDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -156,5 +157,56 @@ class FleetManageController extends Controller
         $vehicle->update($data);
 
         return response()->json(['message' => 'Vehículo actualizado.', 'vehicle' => $vehicle]);
+    }
+
+    public function updateVehicleDocuments(Request $request, int $id)
+    {
+        if (! $request->user()->hasRole(['secretaria', 'jefe_transporte'])) {
+            return response()->json(['message' => 'Acceso denegado.'], 403);
+        }
+
+        $vehicle = Vehicle::findOrFail($id);
+        $data = $request->validate([
+            'documents' => 'required|array',
+            'documents.permiso_circulacion' => 'nullable|array',
+            'documents.revision_tecnica' => 'nullable|array',
+            'documents.matricula' => 'nullable|array',
+            'documents.*.issue_date' => 'nullable|date',
+            'documents.*.expiration_date' => 'nullable|date',
+        ]);
+
+        foreach (['permiso_circulacion', 'revision_tecnica', 'matricula'] as $type) {
+            $documentData = $data['documents'][$type] ?? [];
+            $expirationDate = $documentData['expiration_date'] ?? null;
+
+            if (! $expirationDate) {
+                VehicleLegalDocument::where('vehicle_id', $vehicle->id)
+                    ->where('document_type', $type)
+                    ->delete();
+                continue;
+            }
+
+            $document = VehicleLegalDocument::where('vehicle_id', $vehicle->id)
+                ->where('document_type', $type)
+                ->first();
+
+            VehicleLegalDocument::updateOrCreate(
+                [
+                    'vehicle_id' => $vehicle->id,
+                    'document_type' => $type,
+                ],
+                [
+                    'issue_date' => $documentData['issue_date']
+                        ?? $document?->issue_date
+                        ?? now()->toDateString(),
+                    'expiration_date' => $expirationDate,
+                ]
+            );
+        }
+
+        return response()->json([
+            'message' => 'Documentación del vehículo actualizada.',
+            'vehicle' => $vehicle->load('legalDocuments'),
+        ]);
     }
 }
