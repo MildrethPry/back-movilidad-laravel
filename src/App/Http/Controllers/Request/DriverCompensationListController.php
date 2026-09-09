@@ -14,7 +14,11 @@ class DriverCompensationListController extends Controller
             'routeSheet.driver.user',
             'routeSheet.request.requester',
         ])
-            ->where('payment_status', 'pendiente_comprobante')
+            ->whereIn('payment_status', [
+                'pendiente_comprobante',
+                'confirmado_conductor',
+                'en_disputa',
+            ])
             ->orderBy('id', 'desc')
             ->get();
 

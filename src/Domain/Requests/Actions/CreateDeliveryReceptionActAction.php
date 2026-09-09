@@ -120,7 +120,7 @@ class CreateDeliveryReceptionActAction
                     // llegada sin novedades
                     $routeSheet->update([
                         'final_mileage' => $checkpointMileage,
-                        'trip_status' => 'finalizado',
+                        'trip_status' => 'pendiente_feedback',
                     ]);
 
                     $vehicle->update([
@@ -128,10 +128,7 @@ class CreateDeliveryReceptionActAction
                         'current_mileage' => $checkpointMileage,
                     ]);
 
-                    // Liberar chofer
-                    $routeSheet->driver->update([
-                        'is_available' => true,
-                    ]);
+                    // El conductor se libera al cerrar la liquidación financiera.
                 }
             }
 
