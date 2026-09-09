@@ -12,11 +12,13 @@ class RateConfigurationUpdateController extends Controller
     public function __invoke(Request $request, $id)
     {
         $user = $request->user();
-        if (! $user || $user->role->name !== 'jefe_transporte') {
+        if (! $user || ! $user->hasRole(['secretaria', 'jefe_transporte'])) {
             return response()->json(['message' => 'No autorizado.'], 403);
         }
 
         $request->validate([
+            'rate_label' => 'sometimes|required|string|max:120',
+            'rate_group' => 'sometimes|required|in:allowance,fuel,other',
             'rate_value' => 'required|numeric|min:0.01',
         ], [
             'rate_value.required' => 'El valor de la tarifa es obligatorio.',
@@ -28,6 +30,8 @@ class RateConfigurationUpdateController extends Controller
         $newValue = (float) $request->input('rate_value');
 
         $rate->update([
+            'rate_label' => $request->input('rate_label', $rate->rate_label),
+            'rate_group' => $request->input('rate_group', $rate->rate_group),
             'rate_value' => $newValue,
         ]);
 

@@ -37,6 +37,7 @@ use App\Http\Controllers\Request\ParticipantController;
 use App\Http\Controllers\Request\PendingEvaluationsController;
 use App\Http\Controllers\Request\PendingRouteSheetsController;
 use App\Http\Controllers\Request\RateConfigurationListController;
+use App\Http\Controllers\Request\RateConfigurationStoreController;
 use App\Http\Controllers\Request\RateConfigurationUpdateController;
 use App\Http\Controllers\Request\ReassignRouteSheetController;
 use App\Http\Controllers\Request\ReportsController;
@@ -178,6 +179,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/metrics', DashboardMetricsController::class);
     Route::get('/reportes/facultades', AdminFacultyReportController::class);
     Route::get('/tarifas', RateConfigurationListController::class);
+    Route::post('/tarifas', RateConfigurationStoreController::class);
     Route::put('/tarifas/{id}', RateConfigurationUpdateController::class);
     Route::patch('/estaciones-servicio/{id}/toggle', ServiceStationToggleController::class);
     Route::get('/logs-sistema', SystemLogListController::class);
@@ -196,5 +198,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // CRUD Gestión de Tarifas Institucionales
     Route::get('admin/tarifas', RateConfigurationListController::class);
+    Route::post('admin/tarifas', RateConfigurationStoreController::class);
     Route::put('admin/tarifas/{id}', RateConfigurationUpdateController::class);
 });

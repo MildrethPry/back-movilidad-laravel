@@ -52,7 +52,12 @@ class SolicitudStoreController extends Controller
         $return = Carbon::parse($request->input('return_date'))->startOfDay();
         $estimatedDays = (int) $departure->diffInDays($return) + 1;
 
-        $dailyAllowanceRate = RateConfiguration::where('rate_key', 'viatico_diario')->value('rate_value') ?? 80.00;
+        $legacyDailyRate = RateConfiguration::where('rate_key', 'viatico_diario')->value('rate_value');
+        $lodgingRate = RateConfiguration::where('rate_key', 'alojamiento_diario')->value('rate_value');
+        $foodRate = RateConfiguration::where('rate_key', 'alimentacion_diaria')->value('rate_value');
+        $dailyAllowanceRate = $lodgingRate !== null || $foodRate !== null
+            ? (float) ($lodgingRate ?? 0) + (float) ($foodRate ?? 0)
+            : (float) ($legacyDailyRate ?? 80.00);
         $overtimeRate50 = RateConfiguration::where('rate_key', 'extra_50')->value('rate_value') ?? 5.00;
 
         // Estimar 4 horas extras diarias a la tasa del 50%
@@ -65,13 +70,18 @@ class SolicitudStoreController extends Controller
             $formattedDaily = number_format($dailyAllowanceRate, 2);
             $formattedOvertime = number_format($overtimeEstimate, 2);
 
-            $warningMessage = "DECLARACIÓN DE FONDOS REQUERIDA:\n\nDe conformidad con la normativa de la ULEAM, el costo proyectado de viáticos para esta comisión es de USD {$formattedCost} ({$estimatedDays} día(s) a razón de USD {$formattedDaily}/día más un estimado de USD {$formattedOvertime} en horas extras).\n\nAl confirmar esta solicitud, usted declara y certifica que existen los fondos respectivos en la partida presupuestaria de su facultad o unidad académica para cubrir este traslado.";
+            $breakdown = $lodgingRate !== null || $foodRate !== null
+                ? "USD ".number_format((float) ($lodgingRate ?? 0), 2)." de alojamiento + USD ".number_format((float) ($foodRate ?? 0), 2)." de alimentación por día"
+                : "USD {$formattedDaily} por día";
+            $warningMessage = "DECLARACIÓN DE FONDOS REQUERIDA:\n\nDe conformidad con la normativa de la ULEAM, el costo proyectado de viáticos para esta comisión es de USD {$formattedCost} ({$estimatedDays} día(s), {$breakdown}, más un estimado de USD {$formattedOvertime} en horas extras).\n\nAl confirmar esta solicitud, usted declara y certifica que existen los fondos respectivos en la partida presupuestaria de su facultad o unidad académica para cubrir este traslado.";
 
             return response()->json([
                 'requires_confirmation' => true,
                 'projected_cost' => $projectedCost,
                 'estimated_days' => $estimatedDays,
                 'daily_rate' => (float) $dailyAllowanceRate,
+                'lodging_rate' => $lodgingRate !== null ? (float) $lodgingRate : null,
+                'food_rate' => $foodRate !== null ? (float) $foodRate : null,
                 'overtime_estimate' => $overtimeEstimate,
                 'message' => $warningMessage,
             ]);

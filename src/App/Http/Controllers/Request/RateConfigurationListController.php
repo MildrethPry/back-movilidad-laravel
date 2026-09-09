@@ -11,11 +11,11 @@ class RateConfigurationListController extends Controller
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        if (! $user || $user->role->name !== 'jefe_transporte') {
+        if (! $user || ! $user->hasRole(['secretaria', 'jefe_transporte'])) {
             return response()->json(['message' => 'No autorizado.'], 403);
         }
 
-        $rates = RateConfiguration::orderBy('rate_key')->get();
+        $rates = RateConfiguration::orderBy('rate_group')->orderBy('rate_key')->get();
 
         return response()->json($rates);
     }

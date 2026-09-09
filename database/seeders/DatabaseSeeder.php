@@ -305,6 +305,14 @@ class DatabaseSeeder extends Seeder
             ['rate_value' => 80.00]
         );
         RateConfiguration::firstOrCreate(
+            ['rate_key' => 'alojamiento_diario'],
+            ['rate_value' => 45.00]
+        );
+        RateConfiguration::firstOrCreate(
+            ['rate_key' => 'alimentacion_diaria'],
+            ['rate_value' => 35.00]
+        );
+        RateConfiguration::firstOrCreate(
             ['rate_key' => 'extra_50'],
             ['rate_value' => 5.00]
         );

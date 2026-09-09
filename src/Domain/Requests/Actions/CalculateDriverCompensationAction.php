@@ -32,17 +32,25 @@ class CalculateDriverCompensationAction
 
         // 2. Obtener las tarifas configuradas
         $rateViaticoModel = RateConfiguration::where('rate_key', 'viatico_diario')->first();
+        $lodgingRateModel = RateConfiguration::where('rate_key', 'alojamiento_diario')->first();
+        $foodRateModel = RateConfiguration::where('rate_key', 'alimentacion_diaria')->first();
         $rate50Model = RateConfiguration::where('rate_key', 'extra_50')->first();
         $rate100Model = RateConfiguration::where('rate_key', 'extra_100')->first();
 
-        $rateViatico = $rateViaticoModel ? (float) $rateViaticoModel->rate_value : 80.00;
+        $lodgingRate = $lodgingRateModel ? (float) $lodgingRateModel->rate_value : null;
+        $foodRate = $foodRateModel ? (float) $foodRateModel->rate_value : null;
+        $rateViatico = $lodgingRate !== null || $foodRate !== null
+            ? ($lodgingRate ?? 0) + ($foodRate ?? 0)
+            : ($rateViaticoModel ? (float) $rateViaticoModel->rate_value : 80.00);
         $rate50 = $rate50Model ? (float) $rate50Model->rate_value : 5.00;
         $rate100 = $rate100Model ? (float) $rate100Model->rate_value : 7.50;
         $appliedRateId = $rateViaticoModel ? $rateViaticoModel->id : 1;
 
         // 3. Calcular noches afuera (Viáticos)
         $nights = (int) $departureTime->startOfDay()->diffInDays($arrivalTime->startOfDay());
-        $allowancesAmount = $nights * $rateViatico;
+        $lodgingAmount = $nights * ($lodgingRate ?? $rateViatico);
+        $foodAmount = $nights * ($foodRate ?? 0);
+        $allowancesAmount = $lodgingAmount + $foodAmount;
 
         // 4. Calcular horas extras (50% Suplementarias vs 100% Extraordinarias)
         $overtime50Hours = 0.0;
@@ -109,9 +117,15 @@ class CalculateDriverCompensationAction
             'applied_rate_id' => $appliedRateId,
             'nights_outside' => $nights,
             'allowances_amount' => round($allowancesAmount, 2),
+            'lodging_rate' => round($lodgingRate ?? $rateViatico, 2),
+            'food_rate' => round($foodRate ?? 0, 2),
+            'lodging_amount' => round($lodgingAmount, 2),
+            'food_amount' => round($foodAmount, 2),
             'overtime_50_hours' => $overtime50Hours,
+            'overtime_50_rate' => $rate50,
             'overtime_50_amount' => round($overtime50Amount, 2),
             'overtime_100_hours' => $overtime100Hours,
+            'overtime_100_rate' => $rate100,
             'overtime_100_amount' => round($overtime100Amount, 2),
             'total_payout' => round($totalPayout, 2),
             'departure_real' => $departureTime->toDateTimeString(),
